@@ -1,15 +1,17 @@
-Question 1: The image of _____ Claus shares similarities with the English figure of Father Christmas, and they are both now popularly regarded as the same person
-a) white-bearded
-b) brought
-c) Santa
-d) reinforced
+- **Factual Statements:**
+    1. The Python programming language was created by Guido van Rossum.
+    2. Python is known for its simple and readable syntax.
+    3. Python supports multiple programming paradigms including procedural, object-oriented, and functional programming.
 
-Correct answer: Santa
+- **Non-Factual Statements:**
+    1. The language was named after Monty Python's Flying Circus.
 
-Question 2: Saint Nicholas became renowned for his reported generosity and secret _____
-a) rendered
-b) gift-giving
-c) toys
-d) with
+- **Opinionated Statements:**
+    None
 
-Correct answer: gift-giving
+- **Findings Summary:**
+    The statement that "The language was named after Monty Python's Flying Circus" is non-factual. The name "Python" was not directly inspired by Monty Python's Flying Circus but rather coincidentally shares the same name. This misinformation could mislead readers about the origin of the Python programming language.
+
+- **Sources Used:**
+    1. [Computer History - Guido van Rossum](https://computerhistory.org/profile/guido-van-rossum/)
+    2. [GeeksforGeeks - Python Features](https://www.geeksforgeeks.org/python-features/)

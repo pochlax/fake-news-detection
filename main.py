@@ -51,7 +51,7 @@ def main(datadir, output="results"):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Quiz Generator")
+    parser = argparse.ArgumentParser(description="Fake News Detector")
     parser.add_argument(
         "-d",
         "--datadir",

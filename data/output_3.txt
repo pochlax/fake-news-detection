@@ -1,0 +1,25 @@
+{
+    "factual": [
+        "In 2014, an investigative report found that popular tea brands such as Tetley, Lipton, Twinings, Celestial Seasonings, Red Rose, and Tazo contained high levels of pesticides.",
+        "Chinese-grown green tea has higher fluoride levels compared to Japanese-grown green tea.",
+        "Pesticide residues are frequently identified in raw and processed tea, raising concerns about the quality and safety of tea."
+    ],
+    "non_factual": [
+        "Cheap Tea Contains Fluoride and Pesticides",
+        "Some tea brands, even those claimed organic or pesticide-free, have been found to contain pesticides in quantities above the US and EU limits.",
+        "Decaffeinated tea showed higher fluoride levels than caffeinated tea."
+    ],
+    "opinionated": [
+        "Drinking cheap tea can be as bad as eating junk food.",
+        "Buying loose leaf tea and brewing from scratch is better than bagged tea.",
+        "Stick to white tea as it has the least amount of fluoride.",
+        "Buying organic tea is recommended for more sophisticated cultivation methods."
+    ],
+    "findingsSummary": "The article contains non-factual statements about the dangers of cheap tea, the presence of pesticides in claimed organic teas, and the comparison of fluoride levels in decaffeinated and caffeinated tea. These statements could mislead readers into believing that all cheap tea is harmful, all claimed organic teas contain pesticides, and decaffeinated tea is consistently higher in fluoride. It's important to verify such claims with reliable sources to avoid misinformation.",
+    "tavily_search": [
+        "https://www.msn.com/en-us/health/other/5-tea-brands-that-contained-high-levels-of-pesticides-alternatives/ar-BB1pCvSb",
+        "https://livelovefruit.com/pesticides-in-tea/",
+        "https://delishably.com/beverages/Fluoride-Content-in-Black-Tea-White-Tea-and-Green-Tea-Tea-Health-Benefits-and-Dangers",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC8340115/"
+    ]
+}

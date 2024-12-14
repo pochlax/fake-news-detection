@@ -1,0 +1,7 @@
+python-build: use openssl@1.1 from homebrew
+python-build: use readline from homebrew
+patching file Misc/NEWS.d/next/Build/2021-10-11-16-27-38.bpo-45405.iSfdW5.rst
+patching file configure
+patching file configure.ac
+python-build: use readline from homebrew
+python-build: use zlib from xcode sdk

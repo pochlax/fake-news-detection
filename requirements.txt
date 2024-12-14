@@ -1,1 +1,7 @@
 rouge-score
+openai
+langchain
+langchain-community
+langgraph
+# tiktoken
+langchain-openai

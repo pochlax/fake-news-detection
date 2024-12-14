@@ -1,5 +1,133 @@
 import random
+import json
+import os
+
+from dotenv import load_dotenv
 from typing import List, Dict, Optional
+
+from langchain_community.llms import OpenAI
+from langchain_openai import ChatOpenAI
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+from langchain.prompts import ChatPromptTemplate
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain.agents import AgentExecutor, create_tool_calling_agent
+# from langchain.chains import SequentialChain
+
+# class SectionContent:
+#     def __init__(self, title: str, content: str):
+#         self.title = title
+#         self.content = content
+
+    
+report_structure_prompt = """
+This report focuses on analyzing the credibility of an article.
+
+The report will be structured as follows:
+
+1. Introduction:
+- Title: The title of the article
+- Summary: A short summary of the article. Maximum of 100 words.
+
+2. Main Body Section:
+- Content Analysis: A detailed analysis of the article's content. Specifically, a detailed explanation 
+of the non-factual (speculative,hypothetical, etc.) and opinions made in the article. Explain any confirmation bias
+if detected.
+
+3. Conclusion:
+- Recommendation: A recommendation on whether the article is credible or not.
+"""
+
+# Additional analysis that will be enhanced later.
+# - Sentiment Analysis: Detects the sentiment of the article. Explains if the article is biased towards a particular side.
+# - Social Media Analysis: Analyzes the sentiment of the article's topic on social media. Verifies if the article tone is 
+# consistent with the sentiment of the social media.
+# - Source Analysis: Checks the credibility of the source of the article.
+
+
+content_analysis_prompt = """
+You are an expert at analyzing articles.
+
+You will be provided with an article as input.
+
+Your goal is to extract factual, non-factual (speculative,hypothetical, etc.) and opinionated sections of the article. 
+You can use the Tavily Search tool to confirm the factual statements (if needed). 
+
+Return the response as a JSON object with the following structure:  
+"factual": ["List of factual statements here..."],
+"non_factual": ["List of non-factual statements here..."],
+"opinionated": ["List of opinionated statements here..."],
+"findingsSummary": " A summarry of how the non-factual and opinionated sections detected might mislead the reader. 
+Pick the most important findings and limit the summary to 150 words. If there are no non-factual or opinionated sections, 
+default to "No non-factual or opinionated sections detected.",
+"tavily_search": ["List of sources used to confirm factual statements here..."]
+"""
+
+# Old version of prompt 
+    # You will need to return following keys:
+    # - factual: A list of factual statements as a dictionary.
+    # - non_factual: A list of non-factual statements as a dictionary.
+    # - opinionated: A list of opinionated statements as a dictionary.
+    # - findingsSummary: A summarry of how the non-factual and opinionated sections detected might mislead the reader. 
+    # Pick the most important findings and limit the summary to 150 words. If there are no non-factual or opinionated sections, 
+    # default to "No non-factual or opinionated sections detected."
+    # - tavily_search: A list of sources that were used to confirm the factual statements as a dictionary.
+
+class ContentAnalysisAgent:
+    def __init__(self):
+        self.factual = []
+        self.non_factual = []
+        self.opinions = []
+        self.findingsSummary = ""
+        self.tavily_search = []
+    
+
+    def analyze_content(self, article: str, api_key: str, tavily_api_key: str) -> List[Dict]:
+        """
+        Analyzes the text content and returns a list of dictionaries with the analysis.
+
+        Args:
+            article (str): The text content to analyze.
+
+        Returns:
+            List[Dict]: A list of dictionaries with the findings.
+        """
+
+
+        # llm = OpenAI(api_key=api_key)  
+        llm = ChatOpenAI(
+            api_key=api_key,
+            model="gpt-3.5-turbo",
+            temperature=0
+        )
+
+        search = TavilySearchResults(max_results=2)
+        tools = [search] 
+
+        # prompt = ChatPromptTemplate.from_template([
+        #     SystemMessage(content=content_analysis_prompt),
+        #     HumanMessage(content="{article}")
+        # ])
+
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", content_analysis_prompt),
+            ("human", "Here's the article: {article}"),
+            ("placeholder", "{agent_scratchpad}"),
+        ])
+
+        # Create Simple LLM chain
+        # chain = LLMChain(llm=llm, prompt=prompt)
+        # chain_result = chain.invoke({"article": article})
+
+
+        # Create agent with tools
+        agent = create_tool_calling_agent(llm, tools, prompt)
+        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+        agent_result = agent_executor.invoke({"article": article})
+
+        formatted_json = json.dumps(agent_result, indent=2)
+        print(formatted_json)
 
 
 class QuizAgent:
@@ -130,7 +258,6 @@ class QuizAgent:
 
 
 if __name__ == "__main__":
-    import os
     from pathlib import Path
 
     # Test file path - create a sample text file
@@ -141,22 +268,63 @@ if __name__ == "__main__":
     Python supports multiple programming paradigms including procedural, object-oriented, and functional programming.
     """
 
+
+    random_fake_article = """
+    Solar Panels In The UK Surpass Coal-Powered Electricity Nov 16, 2016 1 0 
+    According to research from Carbon Brief , electricity coming from solar panels in the UK surpassed the amount that came from coal-power. The solar panels across the UK generated about 7,000 gigawatt hours of electricity between April and September, while coal produced about 6,300 gigawatt hours. Solar power continues to trend positively. 
+    According to James Court, who is the head of the Renewable Energy Association , this is an incredible accomplishment: 
+    “Solar overtaking coal this summer would have been largely unthinkable five years ago.” 
+    However, now that winter is approaching, coal will take over again in production as there is a greater need for more heating and lighting through the cold months. 
+    Juliet Davenport, who is the CEO of Good Energy , recently said : 
+    “When I started my company 15 years ago, you could fit the whole UK renewable energy industry into a small room, and now nearly 25% of the UK’s power comes from renewables. As clean technology advances, Britain is bidding fair-well to coal. The transition to a 100% renewable future is within Britain’s grasp.” 
+    This is a great step forward and another sign of the times we are living in. It is becoming cheaper to use solar every year that passes. In fact, according to the Renewable Energy Institute , the cost of solar energy will be cheaper than fossil fuel energy by 2025, with it decreasing every year until that point. “The answer rises every morning.” 
+    In another sign of the continuing trend towards clean and renewable energy, it has been reported by the U.S. Energy Information Administration that U.S. oil companies last year lost $67 billion, at a time when oil prices took a major dive. On the opposite end of that spectrum, Elon Musk’s Tesla company made $22 million in the first quarter of this year . Again, we see the trend moving towards clean energy. 
+    Throughout the eastern hemisphere of the world, there is another large sign that renewable energy is here to stay and is advancing quickly. 
+    In September of this year, leaders from China, Russia, Japan and South Korea met to sign an agreement to begin building what is known as the Asian Super-Grid . The grid is set to become the world’s largest collaboration of sustainable, renewable and clean energy, which will provide energy to the four countries involved, as well as throughout Southern Africa, Europe and Southeast Asia. 
+    How soon do you think the world will be running off of entirely renewable energy? What will be the obstacles? What are the current obstacles? What other renewables exist outside of solar, wind, wave and geothermal that excite you? What other stories are out there that are yet more proof that the world is moving in a positive direction with it’s energy usage? 
+    Lance Schuttler graduated from the University of Iowa with a degree in Health Science and does health coaching through his website Orgonlight Health . You can follow the Orgonlight Health facebook page or visit the website for more information and other inspiring articles.
+    """
+
+    random_fake_article_2 = """
+    Many Popular Tea Bags Contain Alarming Amounts of Deadly Pesticides (avoid these brands like the plague) Most conventional tea brands such as Lipton, Allegro, Celestial Seasonings, Tazo, Teavana, Bigelow, Republic of Tea, Twinings, Yogi, Tea Forte, Mighty Leaf, Trader Joe’s, Tetley contain really high levels of toxic substances such as fluoride and pesticides. We are not talking about calcium fluoride which is a natural element, but about the synthetic fluoride which is a toxic by product. These levels are dangerously high to the point of being considered unsafe. So drinking cheap tea can be as bad as eating junk food. Cheap Tea Contains Fluoride and Pesticides 
+    Most teas are not washed before being dried, thus non-organic teas contain pesticide residues. Some tea brands ( even those claimed organic or pesticide free! ) have recently been found to contain pesticides that are known carcinogens – in quantities above the US and EU limits! 
+    A new study published in the journal of, Food Research International , found that cheaper blends contain enough fluoride to put people under the risk of many illnesses such as bone tooth, kidney problems and even cancer. 
+    In fact, some brands of cheap tea contain nearly 7 parts per million (ppm) and the allowed level of fluoride is 4 ppm. This is quite scary since fluoride gets into your bones and accumulates in your body. It stays there for years. So how did fluoride get into tea? 
+    The tea plant accumulates fluoride as it grows. This means that old leaves contain the most fluoride. Cheaper quality teas are often made from old leaves that contain more fluoride than young tea leaves (here is an example) . Additionally, these cheaper brands use smaller leaves which contain more fluoride. 
+    And what about decaffeinated tea? 
+    Well, decaffeinated tea showed higher fluoride levels than caffeinated tea. 
+    So what is the solution? Should you stop drinking tea all together? Of course not! First of all, make sure to buy loose leaf tea and brew your tea from scratch. Bagged tea which might seem convenient and ready to go, is often made from low quality leaves which surely contain more fluoride. Stick to white tea (here) . It has the least amount of fluoride. Buy organic tea because the methods for cultivation are more sophisticated and conscious. They might even use purified water for the soil. We’ve just scratched the surface here, please check out Food Babe’s full report for more detailed information and a chart of which teas came out with their reputations intact – and please share with your tea-loving friends!
+    """
+
     test_file = Path("test_text.txt")
     test_file.write_text(test_text)
 
-    # Create quiz agent
-    agent = QuizAgent()
+    # # Create quiz agent
+    # agent = QuizAgent()
 
-    print("=== Testing basic question generation ===")
-    questions = agent.generate_questions(test_file)
-    print(questions)
+    # print("=== Testing basic question generation ===")
+    # questions = agent.generate_questions(test_file)
+    # print(questions)
 
-    print("\n=== Testing OpenAI question generation ===")
-    # Only run OpenAI test if API key is available
+    # print("\n=== Testing OpenAI question generation ===")
+    # # Only run OpenAI test if API key is available
+    # api_key = os.getenv("OPENAI_API_KEY")
+    # if api_key:
+    #     ai_questions = agent.generate_questions_with_openai(test_file)
+    #     print(ai_questions)
+    # else:
+    #     print("Skipping OpenAI test - no API key found in environment variables")
+
+    # Load environment variables from .env
+    load_dotenv()
+
+    # Access environment variables
     api_key = os.getenv("OPENAI_API_KEY")
-    if api_key:
-        ai_questions = agent.generate_questions_with_openai(test_file)
-        print(ai_questions)
+    tavily_api_key = os.getenv("TAVILY_API_KEY")
+
+    if api_key and tavily_api_key:
+        agent = ContentAnalysisAgent()
+        agent.analyze_content(random_fake_article_2, api_key, tavily_api_key)
     else:
         print("Skipping OpenAI test - no API key found in environment variables")
 

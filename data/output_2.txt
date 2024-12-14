@@ -1,0 +1,19 @@
+- **Factual Statements:**
+    1. Solar panels in the UK generated about 7,000 gigawatt hours of electricity between April and September 2016, surpassing coal production.
+    2. The Renewable Energy Association's James Court mentioned the significant contribution of biomass towards meeting the UK's renewable heat targets.
+
+- **Non-Factual Statements:**
+    1. The cost of solar energy is predicted to be cheaper than fossil fuel energy by 2025, decreasing every year until that point.
+    2. The article mentions the transition to a 100% renewable future being within Britain's grasp.
+
+- **Opinionated Statements:**
+    1. Juliet Davenport, the CEO of Good Energy, expressed optimism about bidding farewell to coal and transitioning to a 100% renewable future.
+    2. The article discusses the positive trend towards clean and renewable energy, indicating a shift in the energy industry.
+
+- **Findings Summary:**
+    The non-factual statements about the future cost of solar energy and the achievability of a 100% renewable future may create unrealistic expectations for readers. The opinionated statements convey a strong sense of optimism and progress in the renewable energy sector, potentially overlooking challenges and complexities in transitioning to clean energy sources.
+
+- **Sources Used for Factual Statements:**
+    1. [Engineering and Technology Magazine](https://eandt.theiet.org/2016/10/04/uk-electricity-generation-solar-edges-past-coal-2016)
+    2. [Market Business News](https://marketbusinessnews.com/uk-solar-panels-produce-electricity-coal-6-months-2016/145686)
+    3. [Energy Voice](https://www.energyvoice.com/renewables-energy-transition/80157/worlds-smallest-biomass-powerplant-arrives-in-scotland)
