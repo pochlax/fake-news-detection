@@ -1,0 +1,23 @@
+### Factual Statements:
+1. Some teas on the market contain levels of pesticides that exceed Canadian standards.
+2. Half of the teas tested contained pesticide residues above the allowable limits in Canada.
+3. CFIA tests of tea from 2009 and 2011 found that many brands had levels of pesticide residue that exceed allowed levels.
+4. CFIA testing has found the presence of pesticide residues on organic tea leaves.
+
+### Non-Factual Statements:
+1. Tea is the world’s most popular beverage.
+2. Canadians drink almost 10 billion cups of tea a year.
+3. Tea industry claims that tea is safe for Canadians to drink.
+
+### Opinionated Statements:
+1. "This is very worrisome from a number of perspectives," environmental lawyer David Boyd.
+2. "I think that’s a complete abdication of CFIA's responsibility to protect Canadian people," David Boyd.
+3. "The whole point of pesticides is that they’re chemically and biologically active in parts per million or parts per billion," David Boyd.
+4. "If you drink tea, regular tea, I don't care it's what brand is that, the fact of life, this agricultural product does have pesticides," James O’Young.
+
+### Findings Summary:
+The non-factual and opinionated sections in the article might mislead readers by creating a perception that all tea brands are unsafe due to pesticide residues, overlooking the safety measures taken by some companies. The opinions expressed by David Boyd could instill fear without considering the regulatory standards in place. The industry's claim of tea safety without acknowledging the presence of pesticides may downplay the issue. It's essential to consider both sides and understand the regulatory framework to make informed decisions.
+
+### Sources:
+1. [Our Better Health - Pesticide traces in some tea exceed allowable limits](https://ourbetterhealth.org/2014/03/11/pesticide-traces-in-some-tea-exceed-allowable-limits/)
+2. [PubMed - The bitter side of teas: Pesticide residues and their impact on human health](https://pubmed.ncbi.nlm.nih.gov/37482194/)

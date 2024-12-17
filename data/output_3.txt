@@ -23,3 +23,69 @@
         "https://pmc.ncbi.nlm.nih.gov/articles/PMC8340115/"
     ]
 }
+
+
+Invoking: `reddit_search` with `{'query': 'tea brands pesticides'}`
+responded: Based on the article, the keywords and search terms to look up threads on Reddit related to the topic include:
+- "tea brands pesticides"
+- "fluoride in tea"
+- "organic vs conventional tea"
+- "effects of pesticides in tea"
+- "best tea brands to avoid pesticides"
+- "best types of tea to reduce fluoride"
+
+I will search for threads on Reddit related to these keywords to analyze the sentiments of the comments. Let's proceed with searching and analyzing the sentiment on Reddit.
+
+Currently looking for this query: tea brands pesticides
+Token indices sequence length is longer than the specified maximum sequence length for this model (1167 > 512). Running this sequence through the model will result in indexing errors
+Error analyzing comment: The size of tensor a (1167) must match the size of tensor b (512) at non-singleton dimension 1
+Error analyzing comment: The size of tensor a (748) must match the size of tensor b (512) at non-singleton dimension 1
+Error analyzing comment: The size of tensor a (1293) must match the size of tensor b (512) at non-singleton dimension 1
+Error analyzing comment: The size of tensor a (654) must match the size of tensor b (512) at non-singleton dimension 1
+
+Post Title: Are you concerned about pesticides in tea leaves?
+Score: 40
+URL: https://www.reddit.com/r/tea/comments/1axuhmg/are_you_concerned_about_pesticides_in_tea_leaves/
+
+
+                Sentiment Analysis for 50 comments:
+                - Positive comments: 17
+                - Negative comments: 33
+                - Neutral comments: 0
+                - Average sentiment score: -0.31
+                
+
+Post Title: Safe/healthy tea brands that don’t have heavy metals or pesticides?
+Score: 19
+URL: https://www.reddit.com/r/tea/comments/15eymif/safehealthy_tea_brands_that_dont_have_heavy/
+
+
+                Sentiment Analysis for 20 comments:
+                - Positive comments: 5
+                - Negative comments: 11
+                - Neutral comments: 0
+                - Average sentiment score: -0.34
+                
+
+Post Title: DMD Brand Tea Puer Cake
+Score: 1
+URL: https://www.reddit.com/r/puer/comments/16n599q/dmd_brand_tea_puer_cake/
+
+
+                Sentiment Analysis for 10 comments:
+                - Positive comments: 2
+                - Negative comments: 8
+                - Neutral comments: 0
+                - Average sentiment score: -0.63
+                
+
+                Overall Sentiment Analysis:
+                Total Comments Analyzed: 76
+                Total Positive: 24
+                Total Negative: 52
+                Total Neutral: 0
+                Average Sentiment Score: -0.43
+                
+The sentiments extracted from Reddit discussions related to pesticides in tea brands are predominantly negative. Comments express concerns about the presence of pesticides in tea leaves, 
+with a significant number of users showing a negative sentiment towards the issue. People are discussing safe and healthy tea brands that do not have heavy metals or pesticides, seeking 
+alternatives to avoid harmful substances in their teas. Overall, sentiment on Reddit leans towards caution and dissatisfaction regarding the use of pesticides in tea production.

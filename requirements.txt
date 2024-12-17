@@ -6,3 +6,7 @@ langgraph
 # tiktoken
 langchain-openai
 praw
+transformers
+torch
+torchvision
+torchaudio
