@@ -1,6 +1,0 @@
-
-    The Python programming language was created by Guido van Rossum.
-    Python is known for its simple and readable syntax.
-    The language was named after Monty Python's Flying Circus.
-    Python supports multiple programming paradigms including procedural, object-oriented, and functional programming.
-    

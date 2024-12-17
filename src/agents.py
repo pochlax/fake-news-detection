@@ -190,8 +190,10 @@ Your job is to determine keywords and search terms to look up threads on Reddit 
 You can use the Reddit Search Tool to extract the comments and perform sentiment analysis. The tool takes in comments as input and outputs the sentiment results
 
 Return the response as a JSON object with the following structure:
-"sentiments": ["Array of sentiment results here..."],
+"sentiments": ["List of sentiment results here..."],
 "findingsSummary":  "A summary of the sentiment results that are more understandable to readers. Limit the analysis to 100 words", 
+
+Note that the sentiments list should be the output returned from the Reddit Search Tool
 """
 
 class RedditInput(BaseModel):
@@ -300,7 +302,8 @@ class CustomRedditAPITool(BaseTool):
                 """
                 results.append(overall_summary)
 
-            return "\n".join(results)
+            # return "\n".join(results)
+            return results
 
         except Exception as e:
             return f"Error searching Reddit: {str(e)}"
@@ -340,6 +343,56 @@ class SocialMediaAgent:
         formatted_json = json.dumps(agent_result, indent=2)
         print(formatted_json)
         return formatted_json
+
+
+source_analysis_prompt = """
+You are an expert on checking background information on authors as well as news organizations.
+
+You will be provided the name of an author as well as the news organization that published the article.
+
+Your job is to look for evidence that the author or news organization has published misleading or fake articles.
+You can use the Tavily Search tool to confirm the factual statements (if needed). 
+
+Return the response as a JSON object with the following structure:
+"findingsSummary": "A summary of the findings made. Talk about the topic that the previous misleading article was on. Limit the summary to 150 words.",
+"tavily_search": ["List of sources used to confirm factual statements here..."],
+
+If there is no evidence of publishing fake articles, the findingsSummary must default to return "The source has no previous history of publishing misinformation!"
+"""
+
+class SourceAnalysisAgent:
+    def __init__(self):
+        self.findingsSummary = ""
+        self.tavily_search = []
+    
+
+    def analyze_source(self, author: str, publisher: str, api_key: str, tavily_api_key: str) -> List[Dict]:
+        # llm = OpenAI(api_key=api_key)  
+        llm = ChatOpenAI(
+            api_key=api_key,
+            model="gpt-3.5-turbo",
+            temperature=0
+        )
+
+        search = TavilySearchResults(max_results=1)
+        tools = [search] 
+
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", source_analysis_prompt),
+            ("human", "Here's the author's name: {author} and the publishing company: {publisher}"),
+            ("placeholder", "{agent_scratchpad}"),
+        ])
+
+        # Create agent with tools
+        agent = create_tool_calling_agent(llm, tools, prompt)
+        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+        agent_result = agent_executor.invoke({"author": author, "publisher": publisher})
+
+        formatted_json = json.dumps(agent_result, indent=2)
+        print(formatted_json)
+        return formatted_json
+
+
 
 
 class QuizAgent:
@@ -508,7 +561,7 @@ if __name__ == "__main__":
     So what is the solution? Should you stop drinking tea all together? Of course not! First of all, make sure to buy loose leaf tea and brew your tea from scratch. Bagged tea which might seem convenient and ready to go, is often made from low quality leaves which surely contain more fluoride. Stick to white tea (here) . It has the least amount of fluoride. Buy organic tea because the methods for cultivation are more sophisticated and conscious. They might even use purified water for the soil. We’ve just scratched the surface here, please check out Food Babe’s full report for more detailed information and a chart of which teas came out with their reputations intact – and please share with your tea-loving friends!
     """
 
-    print(f"PyTorch version: {torch.__version__}")
+    # print(f"PyTorch version: {torch.__version__}")
 
     test_file = Path("test_text.txt")
     test_file.write_text(test_text)
@@ -548,9 +601,13 @@ if __name__ == "__main__":
     reddit_api_secret = os.getenv("REDDIT_CLIENT_SECRET")
     reddit_user_agent = os.getenv("REDDIT_USER_AGENT")
     api_key = os.getenv("OPENAI_API_KEY")
+    tavily_api_key = os.getenv("TAVILY_API_KEY")
 
-    agent = SocialMediaAgent() 
-    result = agent.analyze_social_media(random_fake_article_2, api_key, reddit_api_id, reddit_api_secret, reddit_user_agent)
+    agent = SourceAnalysisAgent() 
+    result = agent.analyze_source("Megan Griffith-Greene", "CBC", api_key, tavily_api_key)
+
+    # agent = SocialMediaAgent() 
+    # result = agent.analyze_social_media(random_fake_article_2, api_key, reddit_api_id, reddit_api_secret, reddit_user_agent)
     # if reddit_api_id and reddit_api_secret:
     #     reddit_tool = CustomRedditAPITool(reddit_api_id, reddit_api_secret, reddit_user_agent)
     #     testing_results = reddit_tool._run("Yoon Suk Yeol")
