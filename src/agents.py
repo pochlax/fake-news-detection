@@ -1,9 +1,11 @@
 import random
 import json
 import os
+import praw
 
 from dotenv import load_dotenv
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Type
+from pydantic import BaseModel, Field
 
 from langchain_community.llms import OpenAI
 from langchain_openai import ChatOpenAI
@@ -13,6 +15,12 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain.agents import AgentExecutor, create_tool_calling_agent
+
+
+from langchain_community.tools.reddit_search.tool import RedditSearchRun
+from langchain_community.utilities.reddit_search import RedditSearchAPIWrapper
+from langchain.tools import BaseTool
+from langchain_community.tools.reddit_search.tool import RedditSearchSchema
 # from langchain.chains import SequentialChain
 
 # class SectionContent:
@@ -46,6 +54,25 @@ if detected.
 # - Source Analysis: Checks the credibility of the source of the article.
 
 
+# content_analysis_prompt = """
+# You are an expert at analyzing articles.
+
+# You will be provided with an article as input.
+
+# Your goal is to extract factual, non-factual (speculative,hypothetical, etc.) and opinionated sections of the article. 
+# You can use the Tavily Search tool to confirm the factual statements (if needed). 
+
+# Return the response as a JSON object with the following structure:  
+# "factual": ["List of factual statements here..."],
+# "non_factual": ["List of non-factual statements here..."],
+# "opinionated": ["List of opinionated statements here..."],
+# "findingsSummary": " A summarry of how the non-factual and opinionated sections detected might mislead the reader. 
+# Pick the most important findings and limit the summary to 150 words. If there are no non-factual or opinionated sections, 
+# default to "No non-factual or opinionated sections detected.",
+# "tavily_search": ["List of sources used to confirm factual statements here..."]
+# """
+
+# Old version of prompt 
 content_analysis_prompt = """
 You are an expert at analyzing articles.
 
@@ -54,25 +81,16 @@ You will be provided with an article as input.
 Your goal is to extract factual, non-factual (speculative,hypothetical, etc.) and opinionated sections of the article. 
 You can use the Tavily Search tool to confirm the factual statements (if needed). 
 
-Return the response as a JSON object with the following structure:  
-"factual": ["List of factual statements here..."],
-"non_factual": ["List of non-factual statements here..."],
-"opinionated": ["List of opinionated statements here..."],
-"findingsSummary": " A summarry of how the non-factual and opinionated sections detected might mislead the reader. 
+You will need to return following sections:
+- factual: A list of factual statements.
+- non_factual: A list of non-factual statements.
+- opinionated: A list of opinionated statements.
+- findingsSummary: A summarry of how the non-factual and opinionated sections detected might mislead the reader. 
 Pick the most important findings and limit the summary to 150 words. If there are no non-factual or opinionated sections, 
-default to "No non-factual or opinionated sections detected.",
-"tavily_search": ["List of sources used to confirm factual statements here..."]
+default to "No non-factual or opinionated sections detected."
+- tavily_search: A list of sources that were used to confirm the factual statements.
 """
 
-# Old version of prompt 
-    # You will need to return following keys:
-    # - factual: A list of factual statements as a dictionary.
-    # - non_factual: A list of non-factual statements as a dictionary.
-    # - opinionated: A list of opinionated statements as a dictionary.
-    # - findingsSummary: A summarry of how the non-factual and opinionated sections detected might mislead the reader. 
-    # Pick the most important findings and limit the summary to 150 words. If there are no non-factual or opinionated sections, 
-    # default to "No non-factual or opinionated sections detected."
-    # - tavily_search: A list of sources that were used to confirm the factual statements as a dictionary.
 
 class ContentAnalysisAgent:
     def __init__(self):
@@ -95,6 +113,129 @@ class ContentAnalysisAgent:
         """
 
 
+        # llm = OpenAI(api_key=api_key)  
+        llm = ChatOpenAI(
+            api_key=api_key,
+            model="gpt-3.5-turbo",
+            temperature=0
+        )
+
+        search = TavilySearchResults(max_results=1)
+        tools = [search] 
+
+        # prompt = ChatPromptTemplate.from_template([
+        #     SystemMessage(content=content_analysis_prompt),
+        #     HumanMessage(content="{article}")
+        # ])
+
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", content_analysis_prompt),
+            ("human", "Here's the article: {article}"),
+            ("placeholder", "{agent_scratchpad}"),
+        ])
+
+        # Create Simple LLM chain
+        # chain = LLMChain(llm=llm, prompt=prompt)
+        # chain_result = chain.invoke({"article": article})
+
+
+        # Create agent with tools
+        agent = create_tool_calling_agent(llm, tools, prompt)
+        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+        agent_result = agent_executor.invoke({"article": article})
+
+        # print(agent_result)
+
+        # print(agent_result['output'])
+
+        return agent_result['output']
+
+        # formatted_json = json.dumps(agent_result, indent=2)
+        # print(formatted_json)
+        # return formatted_json
+
+
+# class CustomRedditAPITool(BaseTool):
+#     name: str = "reddit_search" 
+#     description: str = "Search Reddit for information about a topic" 
+#     redditSearch: Optional[any] = None
+
+#     def __init__(self, reddit_client_id: str, reddit_client_secret: str, reddit_user_agent: str):
+#         # Setup Reddit tool
+#         reddit = RedditSearchAPIWrapper(
+#             client_id = reddit_client_id,
+#             client_secret = reddit_client_secret,
+#             user_agent = reddit_user_agent
+#         )
+
+#         reddit_tool = RedditSearchRun(api_wrapper=reddit)
+#         self.redditSearch = reddit_tool
+
+#     def _run(self, query: str) -> str:
+#         search_params = RedditSearchSchema(
+#             query=query, time_filter="week", limit="2"
+#         )
+#         results = self.redditSearch.run(tool_input=search_params.dict())
+#         print(result)
+
+class RedditInput(BaseModel):
+    query: str = Field(description="The search query for Reddit")
+
+class CustomRedditAPITool(BaseTool):
+    name: str = "reddit_search"
+    description: str = "Search Reddit for information about a topic"
+    args_schema: Type[BaseModel] = RedditInput
+    _reddit_client: Optional[any] = None
+
+    def __init__(self, client_id: str, client_secret: str, user_agent: str):
+        super().__init__()
+        self._reddit_client = praw.Reddit(
+            client_id=client_id,
+            client_secret=client_secret,
+            user_agent=user_agent
+        )
+
+    def get_comments(self, submission) -> List[str]:
+        """Extract all comments from a submission"""
+        submission.comments.replace_more(limit=None)  # Get all comments
+        comments = []
+        for comment in submission.comments.list():
+            if comment.body:  # Ensure comment has content
+                comments.append(comment.body)
+        return comments
+
+    def _run(self, query: str) -> str:
+        try:
+            # results = []
+            # for submission in self._reddit_client.subreddit("all").search(query, limit=5):
+            #     results.append(f"Title: {submission.title}\nURL: {submission.url}\n")
+            # return "\n".join(results)
+             
+            # Search for top posts
+            subreddit = self._reddit_client.subreddit("all")
+            top_posts = list(subreddit.search(query, sort='top', limit=2))
+            
+            results = []
+            overall_sentiments = []
+            
+            for post in top_posts:
+                # Get post details
+                post_info = f"\nPost Title: {post.title}\nScore: {post.score}\nURL: {post.url}\n"
+                results.append(post_info)
+                
+                # Get and analyze comments
+                comments = self.get_comments(post)
+
+            return comments
+
+        except Exception as e:
+            return f"Error searching Reddit: {str(e)}"
+
+class SocialMediaAgent:
+    def __init__(self):
+        self.social_media_sentiment = ""
+        
+    def analyze_social_media(self, article: str, api_key: str) -> List[Dict]:
         # llm = OpenAI(api_key=api_key)  
         llm = ChatOpenAI(
             api_key=api_key,
@@ -128,6 +269,7 @@ class ContentAnalysisAgent:
 
         formatted_json = json.dumps(agent_result, indent=2)
         print(formatted_json)
+        pass
 
 
 class QuizAgent:
@@ -318,15 +460,26 @@ if __name__ == "__main__":
     # Load environment variables from .env
     load_dotenv()
 
-    # Access environment variables
-    api_key = os.getenv("OPENAI_API_KEY")
-    tavily_api_key = os.getenv("TAVILY_API_KEY")
+    # # Access environment variables
+    # api_key = os.getenv("OPENAI_API_KEY")
+    # tavily_api_key = os.getenv("TAVILY_API_KEY")
 
-    if api_key and tavily_api_key:
-        agent = ContentAnalysisAgent()
-        agent.analyze_content(random_fake_article_2, api_key, tavily_api_key)
-    else:
-        print("Skipping OpenAI test - no API key found in environment variables")
+    # if api_key and tavily_api_key:
+    #     agent = ContentAnalysisAgent()
+    #     agent.analyze_content(random_fake_article_2, api_key, tavily_api_key)
+    # else:
+    #     print("Skipping OpenAI test - no API key found in environment variables")
+
+
+    # Experimenting with Reddit API Tool
+    reddit_api_id = os.getenv("REDDIT_CLIENT_ID")
+    reddit_api_secret = os.getenv("REDDIT_CLIENT_SECRET")
+    reddit_user_agent = os.getenv("REDDIT_USER_AGENT")
+
+    if reddit_api_id and reddit_api_secret:
+        reddit_tool = CustomRedditAPITool(reddit_api_id, reddit_api_secret, reddit_user_agent)
+        testing_results = reddit_tool._run("Yoon Suk Yeol")
+        print(testing_results)
 
     # Clean up test file
     test_file.unlink()

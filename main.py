@@ -1,53 +1,62 @@
 import argparse
 import json
-from src import utils as ut
+import os
 
+from dotenv import load_dotenv
+from src import utils as ut
 from src import agents
 from pathlib import Path
 
 
 def main(datadir, output="results"):
-    # Create output directory if it doesn't exist
-    output_dir = Path(output)
-    output_dir.mkdir(exist_ok=True)
+    # # Create output directory if it doesn't exist
+    # output_dir = Path(output)
+    # output_dir.mkdir(exist_ok=True)
 
     # Load the input and output data
-    input_file = Path(datadir) / "input_1.txt"
-    expected_output = Path(datadir) / "output_1.txt"
-    expected_text = expected_output.read_text()
+    input_file = Path(datadir) / "demo_input.txt"
 
     if not input_file.exists():
         print(f"Error: Input file {input_file} not found")
         return
+    # Read the article file
+    with open(input_file, "r", encoding="utf-8") as file:
+        article_text = file.read()
 
-    if not expected_output.exists():
-        print(f"Warning: Expected output file {expected_output} not found")
+
+
+    # Load environment variables from .env
+    load_dotenv()
+
+    # Access environment variables
+    api_key = os.getenv("OPENAI_API_KEY")
+    tavily_api_key = os.getenv("TAVILY_API_KEY")
 
     # Load the agent
-    agent = agents.QuizAgent()
+    agent = agents.ContentAnalysisAgent()
+
+    # Generate Report Analysis of Article 
+    generated_report = agent.analyze_content(article_text, api_key, tavily_api_key)
+
+    output_file = Path(datadir) / "demo_output.txt"
+    with open(output_file, "a", encoding="utf-8") as f:
+        f.write(generated_report)
+        f.close()
+
 
     # Generate quizzes
-    generated_text = agent.generate_questions(text_path=input_file, num_questions=3)
+    # generated_text = agent.generate_questions(text_path=input_file, num_questions=3)
 
-    print("Expected Output:")
-    print(expected_text)
-    print("\n==============\nGenerated Questions:")
-    print(generated_text)
+    # # Save results
+    # results = {
+    #     "rouge_score": float(score),
+    #     "generated_text": generated_text,
+    #     "expected_text": expected_text,
+    # }
 
-    # Compare results
-    score = ut.compare_outputs(generated_text, expected_text)
-    print(f"\n==============\nROUGE-1 F1 score: {score:.4f}")
-
-    # Save results
-    results = {
-        "rouge_score": float(score),
-        "generated_text": generated_text,
-        "expected_text": expected_text,
-    }
-
-    output_file = output_dir / "pred_1.json"
-    with open(output_file, "w") as f:
-        json.dump(results, f, indent=4)
+    # output_file = output_dir / "pred_1.json"
+    # with open(output_file, "w") as f:
+    #     json.dump(results, f, indent=4)
 
 
 if __name__ == "__main__":

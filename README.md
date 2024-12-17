@@ -1,6 +1,8 @@
 # Fake News Detection
 
-## Quick Start
+![screenshot](imageFolder/coverPhoto.jpg)
+
+<!-- ## Quick Start -->
 
 ## Setup
 
@@ -14,13 +16,13 @@ pip install -r requirements.txt
 python main.py -d data/ -o results/
 ```
 
-## Overview for the Fake News Detection Project
+# Overview for the Fake News Detection Project
 
-This project is a simple implementation of a quiz generation system using a language model. The system takes an input text and generates a quiz based on the text. The quiz is then compared to an expected output to evaluate the performance of the system. 
+In today's digital age, misinformation spreads rapidly, eroding trust and shaping public opinion. By combating false information, we help individuals and organizations make informed decisions and promote a healthier, truth-driven online ecosystem. Our application identifies fake news articles using AI-driven analysis, empowering users to discern fact from fiction.
 
-## 1. Input Data Used
+## 1. Input Data
 
-The input data is a text file containing the news article that is being verified by the Fake News Detection System. The text is a news article .
+The input data is a text file containing the news article that is being verified by the Fake News Detection System. The text is a news article.
 
 ## 2. Output Data
 
@@ -30,7 +32,3 @@ The output data is a report of the credibility level for the input article. The 
 
 - OpenAI GPT-4o
 - OpenAI GPT-4o-mini
-
-## 4. Evaluation Method
-
-The ROUGE-1 F1 score is used to evaluate the performance of the system. The score is calculated by comparing the generated quiz to the expected output.
