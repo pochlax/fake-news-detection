@@ -8,7 +8,7 @@ from src import agents
 from pathlib import Path
 
 
-def main(datadir, output="results"):
+def main(datadir):
     # # Create output directory if it doesn't exist
     # output_dir = Path(output)
     # output_dir.mkdir(exist_ok=True)
@@ -22,8 +22,6 @@ def main(datadir, output="results"):
     # Read the article file
     with open(input_file, "r", encoding="utf-8") as file:
         article_text = file.read()
-
-
 
     # Load environment variables from .env
     load_dotenv()
@@ -68,13 +66,13 @@ if __name__ == "__main__":
         default="data",
         help="Directory containing input data",
     )
-    parser.add_argument(
-        "-o",
-        "--output",
-        type=str,
-        default="results",
-        help="Output directory (default: results)",
-    )
+    # parser.add_argument(
+    #     "-o",
+    #     "--output",
+    #     type=str,
+    #     default="results",
+    #     help="Output directory (default: results)",
+    # )
 
     args = parser.parse_args()
-    main(args.datadir, args.output)
+    main(args.datadir)

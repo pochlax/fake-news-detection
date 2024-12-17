@@ -13,7 +13,7 @@ pip install -r requirements.txt
 ## Run
 
 ```python
-python main.py -d data/ -o results/
+python main.py -d data/
 ```
 
 # Overview for the Fake News Detection Project
@@ -26,7 +26,7 @@ The input data is a text file containing the news article that is being verified
 
 ## 2. Output Data
 
-The output data is a report of the credibility level for the input article. The analysis is broken down into several sections; content analysis, fact verification and social media analysis. The results of the sections will contirbute to the final credibility score.
+The output data is a report of the credibility level for the input article. The analysis is broken down into several sections; content analysis, fact verification and social media analysis. The results of the sections will contirbute to the **final credibility score**.
 
 ## 3. Models Used
 
