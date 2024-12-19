@@ -513,28 +513,17 @@ if __name__ == "__main__":
     # test_file = Path("test_text.txt")
     # test_file.write_text(test_text)
 
-    # # Create quiz agent
-    # agent = QuizAgent()
-
-    # print("=== Testing basic question generation ===")
-    # questions = agent.generate_questions(test_file)
-    # print(questions)
-
-    # print("\n=== Testing OpenAI question generation ===")
-    # # Only run OpenAI test if API key is available
-    # api_key = os.getenv("OPENAI_API_KEY")
-    # if api_key:
-    #     ai_questions = agent.generate_questions_with_openai(test_file)
-    #     print(ai_questions)
-    # else:
-    #     print("Skipping OpenAI test - no API key found in environment variables")
+     ##  ------------------------ SANDBOX TESTING ------------------------
 
     # Load environment variables from .env
     load_dotenv()
 
-    # # Access environment variables
-    # api_key = os.getenv("OPENAI_API_KEY")
-    # tavily_api_key = os.getenv("TAVILY_API_KEY")
+    # Access environment variables
+    api_key = os.getenv("OPENAI_API_KEY")
+    tavily_api_key = os.getenv("TAVILY_API_KEY")
+
+
+     ##  ------------------------ CONTENT ANALYSIS AREA ------------------------
 
     # if api_key and tavily_api_key:
     #     agent = ContentAnalysisAgent()
@@ -542,16 +531,18 @@ if __name__ == "__main__":
     # else:
     #     print("Skipping OpenAI test - no API key found in environment variables")
 
+    ##  ------------------------ SOURCE ANALYSIS AREA ------------------------
+
+    agent = SourceAnalysisAgent() 
+    result = agent.analyze_source("Megan Griffith-Greene", "CBC", api_key, tavily_api_key)
+
+     ##  ------------------------ SOSMED ANALYSIS AREA ------------------------
+
 
     # # Experimenting with Reddit API Tool
     # reddit_api_id = os.getenv("REDDIT_CLIENT_ID")
     # reddit_api_secret = os.getenv("REDDIT_CLIENT_SECRET")
     # reddit_user_agent = os.getenv("REDDIT_USER_AGENT")
-    # api_key = os.getenv("OPENAI_API_KEY")
-    # tavily_api_key = os.getenv("TAVILY_API_KEY")
-
-    # agent = SourceAnalysisAgent() 
-    # result = agent.analyze_source("Megan Griffith-Greene", "CBC", api_key, tavily_api_key)
 
     # agent = SocialMediaAgent() 
     # result = agent.analyze_social_media(random_fake_article_2, api_key, reddit_api_id, reddit_api_secret, reddit_user_agent)
@@ -582,25 +573,26 @@ if __name__ == "__main__":
     #     post_info = f"\nPost Title: {post.title}\nScore: {post.score}\nURL: {post.url}\n"
     #     print(post_info)
 
+    ##  ------------------------ LANGRAPH AREA ------------------------
     # Create orchestrator
-    orchestrator = NewsAnalysisOrchestrator()
+    # orchestrator = NewsAnalysisOrchestrator()
 
-    # Test article
-    test_article = {
-        "text": test_article,
-        "author": "Megan Griffith-Greene",
-        "publisher": "CBC"
-    }
+    # # Test article
+    # test_article = {
+    #     "text": test_article,
+    #     "author": "Megan Griffith-Greene",
+    #     "publisher": "CBC"
+    # }
 
-    # Run analysis
-    result = orchestrator.analyze_article(
-        test_article["text"],
-        test_article["author"],
-        test_article["publisher"]
-    )
+    # # Run analysis
+    # result = orchestrator.analyze_article(
+    #     test_article["text"],
+    #     test_article["author"],
+    #     test_article["publisher"]
+    # )
 
-    # Print or save results
-    print(json.dumps(result, indent=2))
+    # # Print or save results
+    # print(json.dumps(result, indent=2))
 
     # # Clean up test file
     # test_file.unlink()
