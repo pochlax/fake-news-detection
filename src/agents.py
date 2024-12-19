@@ -154,9 +154,9 @@ class ContentAnalysisAgent:
 
         # return agent_result['output']
 
-        formatted_json = json.dumps(agent_result, indent=2)
+        # formatted_json = json.dumps(agent_result, indent=2)
         # print(formatted_json)
-        return formatted_json
+        return agent_result
 
 
 # class CustomRedditAPITool(BaseTool):
@@ -356,10 +356,21 @@ Your job is to look for evidence that the author or news organization has publis
 You can use the Tavily Search tool to confirm the factual statements (if needed). 
 
 Return the response as a JSON object with the following structure:
-"findingsSummary": "A summary of the findings made. Talk about the topic that the previous misleading article was on. Limit the summary to 150 words.",
-"tavily_search": ["List of sources used to confirm factual statements here..."],
+"findingsSummary": "A summary of the findings made about the author and news organization. Talk about the topic that the previous misleading article was on. Limit the summary to 150 words.",
+"tavily_search": ["List of sources used here..."],
 
 If there is no evidence of publishing fake articles, the findingsSummary must default to return "The source has no previous history of publishing misinformation!"
+
+Examples:
+
+\'{{
+  "findingsSummary": "The source has no previous history of publishing misinformation! Megan Griffith-Greene was associated with an article on Yelp, Google, and UrbanSpoon being targets for fake reviews. 
+  CBC has covered topics related to disinformation and fake news, emphasizing the importance of verifying sources, particularly on social media platforms. ",
+  "tavily_search": [
+    "https://www.linkedin.com/in/megangriffithgreene",
+    "https://www.cbc.ca/news/science/fake-news-disinformation-propaganda-internet-1.5196964"
+  ]
+}}\'
 """
 
 class SourceAnalysisAgent:
@@ -373,7 +384,7 @@ class SourceAnalysisAgent:
         llm = ChatOpenAI(
             api_key=api_key,
             model="gpt-3.5-turbo",
-            temperature=0
+            temperature=1
         )
 
         search = TavilySearchResults(max_results=1)
@@ -390,22 +401,24 @@ class SourceAnalysisAgent:
         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
         agent_result = agent_executor.invoke({"author": author, "publisher": publisher})
 
-        formatted_json = json.dumps(agent_result, indent=2)
-        print(formatted_json)
-        return formatted_json
+        # (agent_result)
+        # formatted_json = json.loads(agent_result)
+        # formatted_json = json.dumps(agent_result, indent=2)
+        # print(formatted_json)
+        return agent_result
 
 
 class AgentState(TypedDict):
     input_article: str
     input_author: str
     input_publisher: str
-    # article_summary: str
-    # facts_dict: dict
-    # non_facts_dict: dict
-    # opinions_dict: dict
-    # content_analysis_biblio: dict
-    # author_publisher_background_check: dict
-    # source_analysis_biblio: dict
+    article_summary: str
+    facts_dict: dict
+    non_facts_dict: dict
+    opinions_dict: dict
+    content_analysis_biblio: dict
+    author_publisher_background_check: str
+    source_analysis_biblio: dict
     # soc_med_reddit_comments: dict
     # social_media_biblio: dict
     source_analysis: dict
@@ -424,7 +437,10 @@ def run_source_analysis(state: AgentState) -> AgentState:
         os.getenv("OPENAI_API_KEY"), 
         os.getenv("TAVILY_API_KEY")
     )
-    state["source_analysis"] = result
+    # state["source_analysis"] = result
+    formatted_json = json.loads(result["output"])
+    state["author_publisher_background_check"] = formatted_json["findingsSummary"]
+    state["source_analysis_biblio"] = formatted_json["tavily_search"]
     return state
 
 def run_content_analysis(state: AgentState) -> AgentState:
@@ -435,8 +451,13 @@ def run_content_analysis(state: AgentState) -> AgentState:
         os.getenv("OPENAI_API_KEY"), 
         os.getenv("TAVILY_API_KEY")
     )
-    state["content_analysis"] = result
-    # state["article_summary"] = result.get("summary", "")
+    # state["content_analysis"] = result
+    formatted_json = json.loads(result["output"])
+    state["article_summary"] = formatted_json["findingsSummary"]
+    state["facts_dict"] = formatted_json["factual"]
+    state["non_facts_dict"] = formatted_json["non_factual"]
+    state["opinions_dict"] = formatted_json["opinionated"]
+    state["content_analysis_biblio"] = formatted_json["tavily_search"]
     return state
 
 def fake_news_analysis_workflow():
@@ -527,14 +548,16 @@ if __name__ == "__main__":
 
     # if api_key and tavily_api_key:
     #     agent = ContentAnalysisAgent()
-    #     agent.analyze_content(random_fake_article_2, api_key, tavily_api_key)
+    #     agent.analyze_content(test_article, api_key, tavily_api_key)
     # else:
     #     print("Skipping OpenAI test - no API key found in environment variables")
 
     ##  ------------------------ SOURCE ANALYSIS AREA ------------------------
 
-    agent = SourceAnalysisAgent() 
-    result = agent.analyze_source("Megan Griffith-Greene", "CBC", api_key, tavily_api_key)
+    # agent = SourceAnalysisAgent() 
+    # result = agent.analyze_source("Jonathan Moylan", "BBC", api_key, tavily_api_key)
+    # print(json.dumps(result, indent=2)) 
+    # print(result['output'])
 
      ##  ------------------------ SOSMED ANALYSIS AREA ------------------------
 
@@ -575,24 +598,24 @@ if __name__ == "__main__":
 
     ##  ------------------------ LANGRAPH AREA ------------------------
     # Create orchestrator
-    # orchestrator = NewsAnalysisOrchestrator()
+    orchestrator = NewsAnalysisOrchestrator()
 
-    # # Test article
-    # test_article = {
-    #     "text": test_article,
-    #     "author": "Megan Griffith-Greene",
-    #     "publisher": "CBC"
-    # }
+    # Test article
+    test_article = {
+        "text": test_article,
+        "author": "Jonathan Moylan",
+        "publisher": "New York Times"
+    }
 
-    # # Run analysis
-    # result = orchestrator.analyze_article(
-    #     test_article["text"],
-    #     test_article["author"],
-    #     test_article["publisher"]
-    # )
+    # Run analysis
+    result = orchestrator.analyze_article(
+        test_article["text"],
+        test_article["author"],
+        test_article["publisher"]
+    )
 
-    # # Print or save results
-    # print(json.dumps(result, indent=2))
+    # Print or save results
+    print(json.dumps(result, indent=2))
 
     # # Clean up test file
     # test_file.unlink()
