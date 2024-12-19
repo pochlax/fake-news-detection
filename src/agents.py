@@ -5,7 +5,7 @@ import praw
 import torch
 
 from dotenv import load_dotenv
-from typing import List, Dict, Optional, Type
+from typing import List, Dict, Optional, Type, TypedDict
 from pydantic import BaseModel, Field
 from transformers import pipeline
 from statistics import mean
@@ -19,11 +19,12 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 
-
 from langchain_community.tools.reddit_search.tool import RedditSearchRun
 from langchain_community.utilities.reddit_search import RedditSearchAPIWrapper
 from langchain.tools import BaseTool
 from langchain_community.tools.reddit_search.tool import RedditSearchSchema
+
+from langgraph.graph import StateGraph, END
 
 # from langchain.chains import SequentialChain
 
@@ -31,7 +32,6 @@ from langchain_community.tools.reddit_search.tool import RedditSearchSchema
 #     def __init__(self, title: str, content: str):
 #         self.title = title
 #         self.content = content
-
     
 report_structure_prompt = """
 This report focuses on analyzing the credibility of an article.
@@ -46,6 +46,8 @@ The report will be structured as follows:
 - Content Analysis: A detailed analysis of the article's content. Specifically, a detailed explanation 
 of the non-factual (speculative,hypothetical, etc.) and opinions made in the article. Explain any confirmation bias
 if detected.
+
+- 
 
 3. Conclusion:
 - Recommendation: A recommendation on whether the article is credible or not.
@@ -393,164 +395,109 @@ class SourceAnalysisAgent:
         return formatted_json
 
 
+class AgentState(TypedDict):
+    input_article: str
+    input_author: str
+    input_publisher: str
+    # article_summary: str
+    # facts_dict: dict
+    # non_facts_dict: dict
+    # opinions_dict: dict
+    # content_analysis_biblio: dict
+    # author_publisher_background_check: dict
+    # source_analysis_biblio: dict
+    # soc_med_reddit_comments: dict
+    # social_media_biblio: dict
+    source_analysis: dict
+    content_analysis: dict
+    article_summary: str
+    social_media_analysis: dict
+    final_output: dict
 
+# Define agent nodes
+def run_source_analysis(state: AgentState) -> AgentState:
+    """Analyze source credibility"""
+    source_agent = SourceAnalysisAgent()
+    result = source_agent.analyze_source(
+        state["input_author"],
+        state["input_publisher"],
+        os.getenv("OPENAI_API_KEY"), 
+        os.getenv("TAVILY_API_KEY")
+    )
+    state["source_analysis"] = result
+    return state
 
-class QuizAgent:
+def run_content_analysis(state: AgentState) -> AgentState:
+    """Analyze content and generate summary"""
+    content_agent = ContentAnalysisAgent()
+    result = content_agent.analyze_content(
+        state["input_article"],
+        os.getenv("OPENAI_API_KEY"), 
+        os.getenv("TAVILY_API_KEY")
+    )
+    state["content_analysis"] = result
+    # state["article_summary"] = result.get("summary", "")
+    return state
+
+def fake_news_analysis_workflow():
+    # Initialize the graph
+    workflow = StateGraph(AgentState)
+
+    # Add nodes
+    workflow.add_node("run_source", run_source_analysis)
+    workflow.add_node("run_content", run_content_analysis)
+    # workflow.add_node("run_social", run_social_media_analysis)
+    # workflow.add_node("run_combination", run_output_combination)
+
+    # Define the flow
+    workflow.add_edge("run_content", "run_source")
+    # workflow.add_edge("run_content", "run_social")
+    # workflow.add_edge("run_social", "run_combination")
+    workflow.add_edge("run_source", END)
+
+    # Set entry point
+    workflow.set_entry_point("run_content")
+
+    # Compile
+    return workflow.compile()
+
+# Usage class
+class NewsAnalysisOrchestrator:
     def __init__(self):
-        self.questions = []
+        self.workflow = fake_news_analysis_workflow()
 
-    def generate_questions(self, text_path: str, num_questions: int = 4) -> List[Dict]:
-        """
-        Generates multiple choice questions from a text file.
-
-        Args:
-            text_path (str): Path to the text file
-            num_questions (int): Number of questions to generate (default: 4)
-
-        Returns:
-            List[Dict]: List of dictionaries containing questions, options, and correct answers
-        """
-        # Read the text file
-        with open(text_path, "r", encoding="utf-8") as file:
-            text = file.read()
-
-        # Generate questions (this is a simple implementation - you might want to use
-        # more sophisticated NLP techniques in a production environment)
-        sentences = [s.strip() for s in text.split(".") if s.strip()]
-
-        quiz_questions = []
-        for _ in range(min(num_questions, len(sentences))):
-            # Select a random sentence for the question
-            sentence = random.choice(sentences)
-            sentences.remove(sentence)  # Avoid duplicate questions
-
-            # Create a question by removing a key word
-            words = sentence.split()
-            target_word = random.choice([w for w in words if len(w) > 3])
-            question = sentence.replace(target_word, "_____")
-
-            # Generate incorrect options
-            all_words = [w for w in text.split() if len(w) > 3]
-            wrong_options = random.sample([w for w in all_words if w != target_word], 3)
-
-            # Create options and shuffle them
-            options = wrong_options + [target_word]
-            random.shuffle(options)
-
-            # Create question dictionary
-            quiz_question = {
-                "question": question,
-                "options": options,
-                "correct_answer": target_word,
+    def analyze_article(self, article: str, author: str, publisher: str) -> dict:
+        """Run the complete analysis workflow"""
+        try:
+            # Initialize state
+            initial_state = {
+                "input_article": article,
+                "input_author": author,
+                "input_publisher": publisher,
+                "source_analysis": {},
+                "content_analysis": {},
+                "article_summary": "",
+                "social_media_analysis": {},
+                "final_output": {}
             }
 
-            quiz_questions.append(quiz_question)
-        # Format the questions as a string
-        return self.format_quiz(quiz_questions)
+            # Run workflow
+            result = self.workflow.invoke(initial_state)
 
-    def format_quiz(self, questions: List[Dict]) -> str:
-        """
-        Formats the quiz questions into a readable string.
-        """
-        formatted_quiz = ""
-        for i, q in enumerate(questions):
-            formatted_quiz += f"Question {i}: {q['question']}\n"
-            for j, option in enumerate(q["options"]):
-                formatted_quiz += f"{chr(97 + j)}) {option}\n"
-            formatted_quiz += f"\nCorrect answer: {q['correct_answer']}\n\n"
-        return formatted_quiz
-
-    def generate_questions_with_openai(
-        self, text_path: str, num_questions: int = 4, api_key: Optional[str] = None
-    ) -> List[Dict]:
-        import openai
-
-        """
-        Generates multiple choice questions using OpenAI's API.
-
-        Args:
-            text_path (str): Path to the text file
-            num_questions (int): Number of questions to generate (default: 4)
-            api_key (Optional[str]): OpenAI API key. If None, uses environment variable.
-
-        Returns:
-            List[Dict]: List of dictionaries containing questions, options, and correct answers
-        """
-        # Set up OpenAI client
-        if api_key:
-            openai.api_key = api_key
-
-        # Read the text file
-        with open(text_path, "r", encoding="utf-8") as file:
-            text = file.read()
-
-        # Create the prompt for OpenAI
-        prompt = f"""
-        Create {num_questions} multiple choice questions based on this text:
-        {text}
-
-        Format each question as a JSON object with these fields:
-        - question: the question text
-        - options: array of 4 possible answers
-        - correct_answer: the correct answer (must be one of the options)
-
-        Return only a JSON array of these question objects.
-        """
-
-        try:
-            response = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant that creates quiz questions.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=0.7,
-            )
-
-            # Parse the response
-            import json
-
-            questions = json.loads(response.choices[0].message.content)
-
-            return questions
+            return result
 
         except Exception as e:
-            print(f"Error generating questions with OpenAI: {e}")
-            return []
+            return {
+                "error": str(e),
+                "status": "failed"
+            }
+
 
 
 if __name__ == "__main__":
     from pathlib import Path
 
-    # Test file path - create a sample text file
-    test_text = """
-    The Python programming language was created by Guido van Rossum.
-    Python is known for its simple and readable syntax.
-    The language was named after Monty Python's Flying Circus.
-    Python supports multiple programming paradigms including procedural, object-oriented, and functional programming.
-    """
-
-
-    random_fake_article = """
-    Solar Panels In The UK Surpass Coal-Powered Electricity Nov 16, 2016 1 0 
-    According to research from Carbon Brief , electricity coming from solar panels in the UK surpassed the amount that came from coal-power. The solar panels across the UK generated about 7,000 gigawatt hours of electricity between April and September, while coal produced about 6,300 gigawatt hours. Solar power continues to trend positively. 
-    According to James Court, who is the head of the Renewable Energy Association , this is an incredible accomplishment: 
-    “Solar overtaking coal this summer would have been largely unthinkable five years ago.” 
-    However, now that winter is approaching, coal will take over again in production as there is a greater need for more heating and lighting through the cold months. 
-    Juliet Davenport, who is the CEO of Good Energy , recently said : 
-    “When I started my company 15 years ago, you could fit the whole UK renewable energy industry into a small room, and now nearly 25% of the UK’s power comes from renewables. As clean technology advances, Britain is bidding fair-well to coal. The transition to a 100% renewable future is within Britain’s grasp.” 
-    This is a great step forward and another sign of the times we are living in. It is becoming cheaper to use solar every year that passes. In fact, according to the Renewable Energy Institute , the cost of solar energy will be cheaper than fossil fuel energy by 2025, with it decreasing every year until that point. “The answer rises every morning.” 
-    In another sign of the continuing trend towards clean and renewable energy, it has been reported by the U.S. Energy Information Administration that U.S. oil companies last year lost $67 billion, at a time when oil prices took a major dive. On the opposite end of that spectrum, Elon Musk’s Tesla company made $22 million in the first quarter of this year . Again, we see the trend moving towards clean energy. 
-    Throughout the eastern hemisphere of the world, there is another large sign that renewable energy is here to stay and is advancing quickly. 
-    In September of this year, leaders from China, Russia, Japan and South Korea met to sign an agreement to begin building what is known as the Asian Super-Grid . The grid is set to become the world’s largest collaboration of sustainable, renewable and clean energy, which will provide energy to the four countries involved, as well as throughout Southern Africa, Europe and Southeast Asia. 
-    How soon do you think the world will be running off of entirely renewable energy? What will be the obstacles? What are the current obstacles? What other renewables exist outside of solar, wind, wave and geothermal that excite you? What other stories are out there that are yet more proof that the world is moving in a positive direction with it’s energy usage? 
-    Lance Schuttler graduated from the University of Iowa with a degree in Health Science and does health coaching through his website Orgonlight Health . You can follow the Orgonlight Health facebook page or visit the website for more information and other inspiring articles.
-    """
-
-    random_fake_article_2 = """
+    test_article = """
     Many Popular Tea Bags Contain Alarming Amounts of Deadly Pesticides (avoid these brands like the plague) Most conventional tea brands such as Lipton, Allegro, Celestial Seasonings, Tazo, Teavana, Bigelow, Republic of Tea, Twinings, Yogi, Tea Forte, Mighty Leaf, Trader Joe’s, Tetley contain really high levels of toxic substances such as fluoride and pesticides. We are not talking about calcium fluoride which is a natural element, but about the synthetic fluoride which is a toxic by product. These levels are dangerously high to the point of being considered unsafe. So drinking cheap tea can be as bad as eating junk food. Cheap Tea Contains Fluoride and Pesticides 
     Most teas are not washed before being dried, thus non-organic teas contain pesticide residues. Some tea brands ( even those claimed organic or pesticide free! ) have recently been found to contain pesticides that are known carcinogens – in quantities above the US and EU limits! 
     A new study published in the journal of, Food Research International , found that cheaper blends contain enough fluoride to put people under the risk of many illnesses such as bone tooth, kidney problems and even cancer. 
@@ -563,8 +510,8 @@ if __name__ == "__main__":
 
     # print(f"PyTorch version: {torch.__version__}")
 
-    test_file = Path("test_text.txt")
-    test_file.write_text(test_text)
+    # test_file = Path("test_text.txt")
+    # test_file.write_text(test_text)
 
     # # Create quiz agent
     # agent = QuizAgent()
@@ -596,15 +543,15 @@ if __name__ == "__main__":
     #     print("Skipping OpenAI test - no API key found in environment variables")
 
 
-    # Experimenting with Reddit API Tool
-    reddit_api_id = os.getenv("REDDIT_CLIENT_ID")
-    reddit_api_secret = os.getenv("REDDIT_CLIENT_SECRET")
-    reddit_user_agent = os.getenv("REDDIT_USER_AGENT")
-    api_key = os.getenv("OPENAI_API_KEY")
-    tavily_api_key = os.getenv("TAVILY_API_KEY")
+    # # Experimenting with Reddit API Tool
+    # reddit_api_id = os.getenv("REDDIT_CLIENT_ID")
+    # reddit_api_secret = os.getenv("REDDIT_CLIENT_SECRET")
+    # reddit_user_agent = os.getenv("REDDIT_USER_AGENT")
+    # api_key = os.getenv("OPENAI_API_KEY")
+    # tavily_api_key = os.getenv("TAVILY_API_KEY")
 
-    agent = SourceAnalysisAgent() 
-    result = agent.analyze_source("Megan Griffith-Greene", "CBC", api_key, tavily_api_key)
+    # agent = SourceAnalysisAgent() 
+    # result = agent.analyze_source("Megan Griffith-Greene", "CBC", api_key, tavily_api_key)
 
     # agent = SocialMediaAgent() 
     # result = agent.analyze_social_media(random_fake_article_2, api_key, reddit_api_id, reddit_api_secret, reddit_user_agent)
@@ -635,5 +582,25 @@ if __name__ == "__main__":
     #     post_info = f"\nPost Title: {post.title}\nScore: {post.score}\nURL: {post.url}\n"
     #     print(post_info)
 
-    # Clean up test file
-    test_file.unlink()
+    # Create orchestrator
+    orchestrator = NewsAnalysisOrchestrator()
+
+    # Test article
+    test_article = {
+        "text": test_article,
+        "author": "Megan Griffith-Greene",
+        "publisher": "CBC"
+    }
+
+    # Run analysis
+    result = orchestrator.analyze_article(
+        test_article["text"],
+        test_article["author"],
+        test_article["publisher"]
+    )
+
+    # Print or save results
+    print(json.dumps(result, indent=2))
+
+    # # Clean up test file
+    # test_file.unlink()
