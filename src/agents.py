@@ -72,6 +72,10 @@ Return the response as a JSON object with the following structure:
 "factual": ["List of factual statements here..."],
 "non_factual": ["List of non-factual statements here..."],
 "opinionated": ["List of opinionated statements here..."],
+"tone": "The tone of the article. The only return should be one of the following: Satirical, Sensational, Persuasive, Optimistic, Critical, Informative.",
+"tone_explanation": "A short explanation of why the tone is the one that it is.",
+"bias": "The bias of the article. The only return should be one of the following: None, Minimal, Moderate, Strong",
+"bias_explanation": "A short explanation of why the bias is the one that it is.",
 "findingsSummary": " A summarry of how the non-factual and opinionated sections detected might mislead the reader. 
 Pick the most important findings and limit the summary to 150 words. If there are no non-factual or opinionated sections, 
 default to "No non-factual or opinionated sections detected.",
@@ -102,6 +106,10 @@ class ContentAnalysisAgent:
         self.factual = []
         self.non_factual = []
         self.opinions = []
+        self.tone = ""
+        self.tone_explanation = ""
+        self.bias = ""
+        self.bias_explanation = ""
         self.findingsSummary = ""
         self.tavily_search = []
     
@@ -121,7 +129,7 @@ class ContentAnalysisAgent:
         llm = ChatOpenAI(
             api_key=api_key,
             model="gpt-3.5-turbo",
-            temperature=0
+            temperature=0.3
         )
 
         search = TavilySearchResults(max_results=1)
@@ -484,6 +492,7 @@ def fake_news_analysis_workflow():
     # Compile
     return workflow.compile()
 
+
 # Usage class
 class NewsAnalysisOrchestrator:
     def __init__(self):
@@ -549,20 +558,17 @@ if __name__ == "__main__":
      ##  ------------------------ CONTENT ANALYSIS AREA ------------------------
 
     # if api_key and tavily_api_key:
-    #     agent = ContentAnalysisAgent()
-    #     agent.analyze_content(test_article, api_key, tavily_api_key)
+    agent = ContentAnalysisAgent()
+    result = json.loads(agent.analyze_content(test_article, api_key, tavily_api_key)['output'])
     # else:
-    #     print("Skipping OpenAI test - no API key found in environment variables")
+        # print("Skipping OpenAI test - no API key found in environment variables")
 
     ##  ------------------------ SOURCE ANALYSIS AREA ------------------------
 
     # agent = SourceAnalysisAgent() 
-    # result = agent.analyze_source("Jonathan Moylan", "BBC", api_key, tavily_api_key)
-    # print(json.dumps(result, indent=2)) 
-    # print(result['output'])
+    # result = agent.analyze_source("Jonathan Moylan", "BBC", api_key, tavily_api_key)['output']
 
      ##  ------------------------ SOSMED ANALYSIS AREA ------------------------
-
 
     # # Experimenting with Reddit API Tool
     # reddit_api_id = os.getenv("REDDIT_CLIENT_ID")
@@ -599,22 +605,22 @@ if __name__ == "__main__":
     #     print(post_info)
 
     ##  ------------------------ LANGRAPH AREA ------------------------
-    # Create orchestrator
-    orchestrator = NewsAnalysisOrchestrator()
+    # # Create orchestrator
+    # orchestrator = NewsAnalysisOrchestrator()
 
-    # Test article
-    test_article = {
-        "text": test_article,
-        "author": "Jonathan Moylan",
-        "publisher": "New York Times"
-    }
+    # # Test article
+    # test_article = {
+    #     "text": test_article,
+    #     "author": "Jonathan Moylan",
+    #     "publisher": "New York Times"
+    # }
 
-    # Run analysis
-    result = orchestrator.analyze_article(
-        test_article["text"],
-        test_article["author"],
-        test_article["publisher"]
-    )
+    # # Run analysis
+    # result = orchestrator.analyze_article(
+    #     test_article["text"],
+    #     test_article["author"],
+    #     test_article["publisher"]
+    # )
 
     # Print or save results
     print(json.dumps(result, indent=2))

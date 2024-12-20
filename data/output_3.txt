@@ -1,91 +1,37 @@
 {
-    "factual": [
-        "In 2014, an investigative report found that popular tea brands such as Tetley, Lipton, Twinings, Celestial Seasonings, Red Rose, and Tazo contained high levels of pesticides.",
-        "Chinese-grown green tea has higher fluoride levels compared to Japanese-grown green tea.",
-        "Pesticide residues are frequently identified in raw and processed tea, raising concerns about the quality and safety of tea."
-    ],
-    "non_factual": [
-        "Cheap Tea Contains Fluoride and Pesticides",
-        "Some tea brands, even those claimed organic or pesticide-free, have been found to contain pesticides in quantities above the US and EU limits.",
-        "Decaffeinated tea showed higher fluoride levels than caffeinated tea."
-    ],
-    "opinionated": [
-        "Drinking cheap tea can be as bad as eating junk food.",
-        "Buying loose leaf tea and brewing from scratch is better than bagged tea.",
-        "Stick to white tea as it has the least amount of fluoride.",
-        "Buying organic tea is recommended for more sophisticated cultivation methods."
-    ],
-    "findingsSummary": "The article contains non-factual statements about the dangers of cheap tea, the presence of pesticides in claimed organic teas, and the comparison of fluoride levels in decaffeinated and caffeinated tea. These statements could mislead readers into believing that all cheap tea is harmful, all claimed organic teas contain pesticides, and decaffeinated tea is consistently higher in fluoride. It's important to verify such claims with reliable sources to avoid misinformation.",
-    "tavily_search": [
-        "https://www.msn.com/en-us/health/other/5-tea-brands-that-contained-high-levels-of-pesticides-alternatives/ar-BB1pCvSb",
-        "https://livelovefruit.com/pesticides-in-tea/",
-        "https://delishably.com/beverages/Fluoride-Content-in-Black-Tea-White-Tea-and-Green-Tea-Tea-Health-Benefits-and-Dangers",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC8340115/"
-    ]
+  "factual": [
+    "Many popular tea brands such as Lipton, Allegro, Celestial Seasonings, Tazo, Teavana, Bigelow, Republic of Tea, Twinings, Yogi, Tea Forte, Mighty Leaf, Trader Joe\u2019s, and Tetley contain high levels of toxic substances such as fluoride and pesticides.",
+    "Some tea brands have been found to contain pesticides that are known carcinogens in quantities above the US and EU limits.",
+    "Cheaper blends of tea contain enough fluoride to put people at risk of illnesses such as bone, tooth, kidney problems, and cancer.",
+    "Old tea leaves contain more fluoride than young tea leaves, and cheaper brands often use smaller leaves which contain more fluoride.",
+    "Decaffeinated tea showed higher fluoride levels than caffeinated tea.",
+    "Loose leaf tea and organic tea are recommended to avoid high levels of fluoride and pesticides in tea."
+  ],
+  "non_factual": [
+    "Drinking cheap tea can be as bad as eating junk food.",
+    "Some brands of cheap tea contain nearly 7 parts per million (ppm) of fluoride, exceeding the allowed level of 4 ppm.",
+    "Fluoride accumulates in the body and stays there for years.",
+    "Decaffeinated tea has higher fluoride levels than caffeinated tea.",
+    "Tea plant accumulates fluoride as it grows, with old leaves containing the most fluoride.",
+    "Tea bags made from low-quality leaves contain more fluoride.",
+    "White tea has the least amount of fluoride."
+  ],
+  "opinionated": [
+    "Bagged tea is often made from low-quality leaves which contain more fluoride.",
+    "Buying organic tea is recommended because cultivation methods are more sophisticated and conscious."
+  ],
+  "findingsSummary": "The article contains several non-factual statements such as equating drinking cheap tea to eating junk food, stating specific fluoride levels in tea brands without clear sources, and making claims about fluoride accumulation in the body. These statements could mislead readers by exaggerating the risks associated with consuming tea. Additionally, the opinions expressed about the quality of bagged tea and the benefits of organic tea cultivation are subjective and may not apply universally.",
+  "tavily_search": [
+    "https://theheartysoul.com/5-brands-pesticides-in-tea/",
+    "https://simplecapacity.com/2016/06/popular-tea-bags-contain-illegal-amounts-deadly-pesticides-fluoride-avoid-brands/",
+    "https://www.sommerspc.com/blog/2016/07/natural-tea-may-contain-unnatural-pesticides/",
+    "https://www.foodnavigator-usa.com/Article/2017/12/22/All-natural-blues-at-Bigelow-Tea-as-CEO-blasts-frivolous-glyphosate-lawsuit/",
+    "https://yoursustainableguide.com/teas-with-least-pesticides/",
+    "https://www.cnn.com/2024/05/16/health/yogi-tea-recall/index.html",
+    "https://toxicfreechoice.com/non-toxic-tea/",
+    "https://deeprootsathome.com/tea-brands-pesticides/",
+    "https://dailyhealthpost.com/pesticides-tea/2/",
+    "https://www.rdhmag.com/patient-care/patient-education/article/14033922/hidden-fluoride-in-tea-and-other-foods-and-beverages",
+    "https://www.sciencedirect.com/science/article/pii/S0045653524024500"
+  ]
 }
-
-
-Invoking: `reddit_search` with `{'query': 'tea brands pesticides'}`
-responded: Based on the article, the keywords and search terms to look up threads on Reddit related to the topic include:
-- "tea brands pesticides"
-- "fluoride in tea"
-- "organic vs conventional tea"
-- "effects of pesticides in tea"
-- "best tea brands to avoid pesticides"
-- "best types of tea to reduce fluoride"
-
-I will search for threads on Reddit related to these keywords to analyze the sentiments of the comments. Let's proceed with searching and analyzing the sentiment on Reddit.
-
-Currently looking for this query: tea brands pesticides
-Token indices sequence length is longer than the specified maximum sequence length for this model (1167 > 512). Running this sequence through the model will result in indexing errors
-Error analyzing comment: The size of tensor a (1167) must match the size of tensor b (512) at non-singleton dimension 1
-Error analyzing comment: The size of tensor a (748) must match the size of tensor b (512) at non-singleton dimension 1
-Error analyzing comment: The size of tensor a (1293) must match the size of tensor b (512) at non-singleton dimension 1
-Error analyzing comment: The size of tensor a (654) must match the size of tensor b (512) at non-singleton dimension 1
-
-Post Title: Are you concerned about pesticides in tea leaves?
-Score: 40
-URL: https://www.reddit.com/r/tea/comments/1axuhmg/are_you_concerned_about_pesticides_in_tea_leaves/
-
-
-                Sentiment Analysis for 50 comments:
-                - Positive comments: 17
-                - Negative comments: 33
-                - Neutral comments: 0
-                - Average sentiment score: -0.31
-                
-
-Post Title: Safe/healthy tea brands that don’t have heavy metals or pesticides?
-Score: 19
-URL: https://www.reddit.com/r/tea/comments/15eymif/safehealthy_tea_brands_that_dont_have_heavy/
-
-
-                Sentiment Analysis for 20 comments:
-                - Positive comments: 5
-                - Negative comments: 11
-                - Neutral comments: 0
-                - Average sentiment score: -0.34
-                
-
-Post Title: DMD Brand Tea Puer Cake
-Score: 1
-URL: https://www.reddit.com/r/puer/comments/16n599q/dmd_brand_tea_puer_cake/
-
-
-                Sentiment Analysis for 10 comments:
-                - Positive comments: 2
-                - Negative comments: 8
-                - Neutral comments: 0
-                - Average sentiment score: -0.63
-                
-
-                Overall Sentiment Analysis:
-                Total Comments Analyzed: 76
-                Total Positive: 24
-                Total Negative: 52
-                Total Neutral: 0
-                Average Sentiment Score: -0.43
-                
-The sentiments extracted from Reddit discussions related to pesticides in tea brands are predominantly negative. Comments express concerns about the presence of pesticides in tea leaves, 
-with a significant number of users showing a negative sentiment towards the issue. People are discussing safe and healthy tea brands that do not have heavy metals or pesticides, seeking 
-alternatives to avoid harmful substances in their teas. Overall, sentiment on Reddit leans towards caution and dissatisfaction regarding the use of pesticides in tea production.
