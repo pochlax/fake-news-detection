@@ -10,3 +10,7 @@ transformers
 torch
 torchvision
 torchaudio
+flask
+validators
+newspaper3k
+lxml-html-clean
