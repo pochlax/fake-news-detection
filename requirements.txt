@@ -11,6 +11,7 @@ torch
 torchvision
 torchaudio
 flask
+flask-cors
 validators
 newspaper3k
 lxml-html-clean

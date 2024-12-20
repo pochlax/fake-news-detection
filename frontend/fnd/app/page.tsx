@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -12,6 +13,42 @@ import { ArrowLeft, Download } from 'lucide-react'
 import { Progress } from "@/components/ui/progress"
 
 export default function ArticleAnalyzer() {
+  const [inputUrl, setInputUrl] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [articleContent, setArticleContent] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleAnalyze = async () => {
+    try {
+      setIsAnalyzing(true);
+      setError(null);
+
+      const response = await fetch('http://localhost:5000/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: inputUrl
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setArticleContent(result.article || 'No article content available');
+
+      // Update other UI elements based on the response
+      // You can add more state variables and update them here
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Analysis error:', err);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="border-b bg-white px-4 py-3">
@@ -38,12 +75,19 @@ export default function ArticleAnalyzer() {
             <div className="flex gap-2">
               <input
                 type="url"
+                value={inputUrl}
+                onChange={(e) => setInputUrl(e.target.value)}
+                disabled={isAnalyzing}
                 placeholder="Enter article URL to analyze..."
                 className="flex-1 px-3 py-2 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="Article URL input"
               />
-              <Button size="sm">
-                Analyze
+              <Button
+                size="sm"
+                onClick={handleAnalyze}
+                disabled={isAnalyzing || !inputUrl}
+              >
+                {isAnalyzing ? 'Analyzing...' : 'Analyze'}
               </Button>
             </div>
           </CardContent>
@@ -74,63 +118,20 @@ export default function ArticleAnalyzer() {
             <CardTitle>Article Content</CardTitle>
           </CardHeader>
           <CardContent className="prose max-w-none dark:prose-invert">
-            <p>
-              Canadians drink almost 10 billion cups of tea a year, but what else is steeping in those cups? Testing by CBC Marketplace and CBC’s French investigative consumer show L’Epicerie reveals that some teas on the market contain levels of pesticides that exceed Canadian standards.
-
-              Tea is the world’s most popular beverage, often touted for its healthful properties. Canadians 16 and older drink 83 litres per person every year, a number that has been increasing.
-
-              CBC tested black and green teas including Canada’s most popular brands: Lipton, Red Rose, Tetley and Twinings. Other popular brands tested included No Name, Uncle Lee’s Legends of China, King Cole and Signal. Full test results can be found here.
-
-              Using an accredited lab, CBC used the testing method employed by the Canadian Food Inspection Agency (CFIA) to test pesticide residues in dry tea leaves.
-
-              Marketplace investigation
-              Watch Marketplace's episode, Strange Brew, at cbc.ca/marketplace.
-
-              Half of the teas tested contained pesticide residues above the allowable limits in Canada. And eight of the 10 brands tested contained multiple chemicals, with one brand containing residues of 22 different pesticides.
-
-              Some of the pesticides found — including endosulfan and monocrotophos — are in the process of being banned from use in some countries because of dangers to the environment and to workers.
-
-              Of the 10 brands tested, only Red Rose came back free of pesticide residues.
-
-              "This is very worrisome from a number of perspectives," environmental lawyer David Boyd, told Marketplace in an interview.
-
-              "The presence of so many pesticides on a single product and so many products that exceed the maximum residue limits for pesticides, suggests that we're seeing very poor agricultural practices in countries, which poses risk to the environment where these products are being grown; which pose risk to the farm workers who are growing these crops, and ultimately pose risk to the Canadians who are consuming these products."
-
-              Health effects questioned
-              The CFIA is responsible for monitoring pesticide levels in the food we buy. CFIA tests of tea from 2009 and 2011 found that many of the brands the agency tested had levels of pesticide residue that exceed allowed levels.
-
-
-              Canadians drink almost 10 billion cups of tea every year. CBC tested popular brands for pesticides; half of the teas tested contained pesticide residues above the allowable limits. (CBC)
-              A CFIA study published in the Journal of Agricultural and Food Chemistry this past January found that pesticide residues in dry tea leaves do make their way into brewed tea. "The pesticide residues were likely transferred from tea leaves to brewed tea during the brewing process, and may therefore pose a risk to consumers," the paper concludes.
-
-              CBC retested some brands that had failed past CFIA testing, and found that the problem continues.
-
-              CFIA declined to speak with the CBC in an interview. However, in a statement, the agency says that while many teas failed to meet levels set by the government, the agency sees no cause for alarm, even for teas that exceed the limits.
-
-              "Health Canada reviewed the information provided by Marketplace and for the pesticides bifenthrin, imidacloprid, acetamiprid, chlorfenapyr, pyridaben, acephate, dicofol and monocrotophos determined that consumption of tea containing the residues listed does not pose a health risk based on the level of residues reported, expected frequency of exposure and contribution to overall diet. Moreover, a person would have to consume approximately 75 cups of tea per day over their entire lifetime to elicit an adverse health effect," a spokesperson wrote to the CBC in a statement.
-
-              But Boyd says the government should be alarmed by the results. "I think that’s a complete abdication of CFIA's responsibility to protect Canadian people. The reality is that there is emerging science about the impacts of pesticides at very low concentrations," he says.
-
-              "The whole point of pesticides is that they’re chemically and biologically active in parts per million or parts per billion,” Boyd says. “Pesticides can have adverse effects at what are seemingly very small concentrations.”
-
-              According to Boyd, these results "should raise a red flag for the regulators whose job is to protect the health and safety of Canadians in our environment."
-
-              Tea industry responds
-              Despite the tests, the Tea Association of Canada says that tea is safe for Canadians to drink.
-
-              In an interview with Marketplace, James O’Young, vice president of Uncle Lee’s Legends of China — whose green tea had the highest number of pesticides in the brands tested — said that pesticides are a reality of the tea industry. "If you drink tea, regular tea, I don't care it's what brand is that, the fact of life, this agricultural product does have pesticides," he says.
-
-              TATA Global Beverages, which owns Tetley, and Unilever, which owns Red Rose and Lipton, both stand behind the safety of their products.
-
-              "Consumer safety is very important to us. Upon receiving your communication, we proactively retrieved the test results from the independent laboratory that tested the raw tea used in this batch code which confirmed that our tea complies with all Canadian food safety regulations and is of high quality," TATA Global Beverages wrote in a statement.
-
-              "Unilever is fully confident in the safety of our teas," the company wrote in a statement.
-
-              Boyd says that the best way to avoid pesticides is to support organic producers. "If you like drinking tea, you can drink organic tea, which is less likely to be contaminated by pesticides," he says.
-
-              But even then, CFIA testing has found the presence of pesticide residues on organic tea leaves.
-            </p>
-            {/* More article content would go here */}
+            {error && (
+              <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
+                {error}
+              </div>
+            )}
+            {isAnalyzing ? (
+              <div className="text-center py-4">
+                <p>Analyzing article...</p>
+              </div>
+            ) : (
+              <p>
+                {articleContent || `Original content...`}
+              </p>
+            )}
           </CardContent>
         </Card>
 

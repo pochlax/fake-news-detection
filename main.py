@@ -11,9 +11,11 @@ from flask import Flask, request, jsonify
 from src.agents import NewsAnalysisOrchestrator
 from newspaper import Article
 from urllib.parse import urlparse
+from flask_cors import CORS
 
 # Initialize Flask app
 app = Flask(__name__)
+CORS(app)
 
 # Load environment variables
 load_dotenv()
