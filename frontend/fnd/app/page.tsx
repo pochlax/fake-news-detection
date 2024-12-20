@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress"
 export default function ArticleAnalyzer() {
   const [inputUrl, setInputUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [articleTitle, setArticleTitle] = useState('Article Content');
   const [articleContent, setArticleContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +38,7 @@ export default function ArticleAnalyzer() {
 
       const result = await response.json();
       setArticleContent(result.article || 'No article content available');
+      setArticleTitle(result.title || 'Article Content');
 
       // Update other UI elements based on the response
       // You can add more state variables and update them here
@@ -115,7 +117,7 @@ export default function ArticleAnalyzer() {
         {/* Main Content - Article Text */}
         <Card className="col-span-1">
           <CardHeader>
-            <CardTitle>Article Content</CardTitle>
+            <CardTitle>{articleTitle}</CardTitle>
           </CardHeader>
           <CardContent className="prose max-w-none dark:prose-invert">
             {error && (
