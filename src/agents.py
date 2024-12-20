@@ -125,71 +125,31 @@ class ContentAnalysisAgent:
             List[Dict]: A list of dictionaries with the findings.
         """
 
-        # llm = OpenAI(api_key=api_key)  
+        # Initialize LLM
         llm = ChatOpenAI(
             api_key=api_key,
             model="gpt-3.5-turbo",
             temperature=0.3
         )
 
+        # Initialize Tools
         search = TavilySearchResults(max_results=1)
         tools = [search] 
 
-        # prompt = ChatPromptTemplate.from_template([
-        #     SystemMessage(content=content_analysis_prompt),
-        #     HumanMessage(content="{article}")
-        # ])
-
+        # Initialize Prompt Template
         prompt = ChatPromptTemplate.from_messages([
             ("system", content_analysis_prompt),
             ("human", "Here's the article: {article}"),
             ("placeholder", "{agent_scratchpad}"),
         ])
 
-        # Create Simple LLM chain
-        # chain = LLMChain(llm=llm, prompt=prompt)
-        # chain_result = chain.invoke({"article": article})
-
-
-        # Create agent with tools
-        agent = create_tool_calling_agent(llm, tools, prompt)
+        # Create AI Agent with Tools
+        agent = create_tool_caloling_agent(llm, tools, prompt)
         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
         agent_result = agent_executor.invoke({"article": article})
 
-        # print(agent_result)
-
-        # print(agent_result['output'])
-
-        # return agent_result['output']
-
-        # formatted_json = json.dumps(agent_result, indent=2)
-        # print(formatted_json)
         return agent_result
-
-
-# class CustomRedditAPITool(BaseTool):
-#     name: str = "reddit_search" 
-#     description: str = "Search Reddit for information about a topic" 
-#     redditSearch: Optional[any] = None
-
-#     def __init__(self, reddit_client_id: str, reddit_client_secret: str, reddit_user_agent: str):
-#         # Setup Reddit tool
-#         reddit = RedditSearchAPIWrapper(
-#             client_id = reddit_client_id,
-#             client_secret = reddit_client_secret,
-#             user_agent = reddit_user_agent
-#         )
-
-#         reddit_tool = RedditSearchRun(api_wrapper=reddit)
-#         self.redditSearch = reddit_tool
-
-#     def _run(self, query: str) -> str:
-#         search_params = RedditSearchSchema(
-#             query=query, time_filter="week", limit="2"
-#         )
-#         results = self.redditSearch.run(tool_input=search_params.dict())
-#         print(result)
-
+        
 
 social_media_analysis_prompt = """
 You are an expert at searching Reddit and analyzing the sentiment of a topic from comments.
