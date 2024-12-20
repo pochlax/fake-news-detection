@@ -421,6 +421,8 @@ class AgentState(TypedDict):
     source_analysis_biblio: dict
     # soc_med_reddit_comments: dict
     # social_media_biblio: dict
+    # content_sentiment: dict
+    # reddit_comments_sentiment: dict
     source_analysis: dict
     content_analysis: dict
     article_summary: str
