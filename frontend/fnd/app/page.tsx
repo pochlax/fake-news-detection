@@ -23,6 +23,7 @@ export default function ArticleAnalyzer() {
   const [toneExplanation, setToneExplanation] = useState<string>('');
   const [bias, setBias] = useState<string>('');
   const [biasExplanation, setBiasExplanation] = useState<string>('');
+  const [supportedClaims, setSupportedClaims] = useState<string>('');
 
   const handleAnalyze = async () => {
     try {
@@ -50,6 +51,7 @@ export default function ArticleAnalyzer() {
       setToneExplanation(result.tone_explanation || '');
       setBias(result.bias || 'Unknown');
       setBiasExplanation(result.bias_explanation || '');
+      setSupportedClaims(result.supported_claims || '');
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -57,6 +59,18 @@ export default function ArticleAnalyzer() {
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  // Add new function to format article text with paragraphs
+  const formatArticleText = (text: string) => {
+    if (!text) return '';
+    // Split text by double newlines or single newlines
+    const paragraphs = text.split(/\n\n|\n/).filter(p => p.trim());
+    return paragraphs.map((paragraph, index) => (
+      <p key={index} className="mb-4 last:mb-0">
+        {paragraph.trim()}
+      </p>
+    ));
   };
 
   // Helper function to get color based on analysis type
@@ -74,8 +88,68 @@ export default function ArticleAnalyzer() {
       'Minimal': 'text-blue-600',
       'Moderate': 'text-yellow-600',
       'Strong': 'text-red-600',
+      // Support Claims colors
+      'Well-Supported': 'text-green-600',
+      'Reasonably-Supported': 'text-blue-600',
+      'Speculative/ Anecdotal': 'text-yellow-600',
+      'Misleading': 'text-red-600',
     };
     return colorMap[value] || 'text-gray-600';
+  };
+
+  // Add function to calculate content score
+  const calculateContentScore = (): number => {
+    let score = 0;
+    let total = 0;
+
+    // Score based on tone (0-100)
+    const toneScores: Record<string, number> = {
+      'Informative': 100,
+      'Optimistic': 80,
+      'Persuasive': 60,
+      'Critical': 40,
+      'Sensational': 20,
+      'Satirical': 0
+    };
+    if (tone && tone in toneScores) {
+      score += toneScores[tone];
+      total += 100;
+    }
+
+    // Score based on bias (0-100)
+    const biasScores: Record<string, number> = {
+      'None': 100,
+      'Minimal': 75,
+      'Moderate': 50,
+      'Strong': 0
+    };
+    if (bias && bias in biasScores) {
+      score += biasScores[bias];
+      total += 100;
+    }
+
+    // Score based on supported claims (0-100)
+    const claimScores: Record<string, number> = {
+      'Well-Supported': 100,
+      'Reasonably-Supported': 75,
+      'Speculative/ Anecdotal': 25,
+      'Misleading': 0
+    };
+    if (supportedClaims && supportedClaims in claimScores) {
+      score += claimScores[supportedClaims];
+      total += 100;
+    }
+
+    // Calculate percentage (if no categories are available, return 0)
+    return total > 0 ? Math.round((score / total) * 100) : 0;
+  };
+
+  // Get color for the score badge
+  const getScoreColor = (score: number): string => {
+    if (score >= 80) return 'bg-green-100 text-green-600';
+    if (score >= 60) return 'bg-blue-100 text-blue-600';
+    if (score >= 40) return 'bg-yellow-100 text-yellow-600';
+    return 'bg-red-100 text-red-600';
   };
 
   return (
@@ -157,9 +231,9 @@ export default function ArticleAnalyzer() {
                 <p>Analyzing article...</p>
               </div>
             ) : (
-              <p>
-                {articleContent || `Original content...`}
-              </p>
+              <div>
+                {formatArticleText(articleContent || '')}
+              </div>
             )}
           </CardContent>
         </Card>
@@ -176,9 +250,11 @@ export default function ArticleAnalyzer() {
                   <AccordionTrigger>
                     <div className="flex items-center gap-2">
                       Content Analysis
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-600">
-                        90%
-                      </span>
+                      {articleContent && ( // Only show score if article content exists
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(calculateContentScore())}`}>
+                          {calculateContentScore()}%
+                        </span>
+                      )}
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -207,7 +283,9 @@ export default function ArticleAnalyzer() {
                       )}
                       <div className="flex justify-between">
                         <span>Claims</span>
-                        <span className="font-medium text-green-600">Well-supported</span>
+                        <span className={`font-medium ${getAnalysisColor('supportedClaims', supportedClaims)}`}>
+                          {supportedClaims || 'Analyzing...'}
+                        </span>
                       </div>
                     </div>
                   </AccordionContent>

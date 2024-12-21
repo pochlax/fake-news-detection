@@ -76,6 +76,9 @@ Return the response as a JSON object with the following structure:
 "tone_explanation": "A short explanation of why the tone is the one that it is.",
 "bias": "The bias of the article. The only return should be one of the following: None, Minimal, Moderate, Strong",
 "bias_explanation": "A short explanation of why the bias is the one that it is.",
+"supported_claims": "The claims made in the article. The only return should be one of the following: Well-Supported, Reasonably-Supported, Speculative/ Anecdotal, Misleading". If at least 85 percent of the 
+statements are factual, return "Well Supported". If between 65-85 percent of the statements are factual, return "Reasonably Supported". If atleast 60 percent of the statements are either factual 
+or opinionated, return "Speculative/ Anecdotal". Else, return "Misleading".
 "findingsSummary": " A summarry of how the non-factual and opinionated sections detected might mislead the reader. 
 Pick the most important findings and limit the summary to 150 words. If there are no non-factual or opinionated sections, 
 default to "No non-factual or opinionated sections detected.",
@@ -110,6 +113,7 @@ class ContentAnalysisAgent:
         self.tone_explanation = ""
         self.bias = ""
         self.bias_explanation = ""
+        self.supported_claims = ""
         self.findingsSummary = ""
         self.tavily_search = []
     
@@ -384,11 +388,12 @@ class AgentState(TypedDict):
     facts_dict: dict
     non_facts_dict: dict
     opinions_dict: dict
-    content_analysis_biblio: dict
     tone: str
     tone_explanation: str
     bias: str
     bias_explanation: str
+    supported_claims: str
+    content_analysis_biblio: dict
     author_publisher_background_check: str
     source_analysis_biblio: dict
     # soc_med_reddit_comments: dict
@@ -435,6 +440,7 @@ def run_content_analysis(state: AgentState) -> AgentState:
     state["tone_explanation"] = formatted_json["tone_explanation"]
     state["bias"] = formatted_json["bias"]
     state["bias_explanation"] = formatted_json["bias_explanation"]
+    state["supported_claims"] = formatted_json["supported_claims"]
     state["content_analysis_biblio"] = formatted_json["tavily_search"]
     return state
 
