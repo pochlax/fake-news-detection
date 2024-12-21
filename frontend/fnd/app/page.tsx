@@ -19,6 +19,11 @@ export default function ArticleAnalyzer() {
   const [articleContent, setArticleContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [tone, setTone] = useState<string>('');
+  const [toneExplanation, setToneExplanation] = useState<string>('');
+  const [bias, setBias] = useState<string>('');
+  const [biasExplanation, setBiasExplanation] = useState<string>('');
+
   const handleAnalyze = async () => {
     try {
       setIsAnalyzing(true);
@@ -40,8 +45,11 @@ export default function ArticleAnalyzer() {
       setArticleContent(result.article || 'No article content available');
       setArticleTitle(result.title || 'Article Content');
 
-      // Update other UI elements based on the response
-      // You can add more state variables and update them here
+      // Update tone and bias from response
+      setTone(result.tone || 'Unknown');
+      setToneExplanation(result.tone_explanation || '');
+      setBias(result.bias || 'Unknown');
+      setBiasExplanation(result.bias_explanation || '');
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -49,6 +57,25 @@ export default function ArticleAnalyzer() {
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  // Helper function to get color based on analysis type
+  const getAnalysisColor = (type: string, value: string): string => {
+    const colorMap: Record<string, string> = {
+      // Tone colors
+      'Satirical': 'text-red-600',
+      'Sensational': 'text-orange-600',
+      'Persuasive': 'text-yellow-600',
+      'Optimisitic': 'text-purple-600',
+      'Critical': 'text-blue-600',
+      'Informative': 'text-green-600',
+      // Bias colors
+      'None': 'text-green-600',
+      'Minimal': 'text-blue-600',
+      'Moderate': 'text-yellow-600',
+      'Strong': 'text-red-600',
+    };
+    return colorMap[value] || 'text-gray-600';
   };
 
   return (
@@ -158,12 +185,26 @@ export default function ArticleAnalyzer() {
                     <div className="grid gap-2 text-sm">
                       <div className="flex justify-between">
                         <span>Tone</span>
-                        <span className="font-medium text-green-600">Neutral</span>
+                        <span className={`font-medium ${getAnalysisColor('tone', tone)}`}>
+                          {tone || 'Analyzing...'}
+                        </span>
                       </div>
+                      {toneExplanation && (
+                        <div className="mt-1 text-xs text-gray-600">
+                          {toneExplanation}
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span>Bias</span>
-                        <span className="font-medium text-yellow-600">Minimal</span>
+                        <span className={`font-medium ${getAnalysisColor('bias', bias)}`}>
+                          {bias || 'Analyzing...'}
+                        </span>
                       </div>
+                      {biasExplanation && (
+                        <div className="mt-1 text-xs text-gray-600">
+                          {biasExplanation}
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span>Claims</span>
                         <span className="font-medium text-green-600">Well-supported</span>

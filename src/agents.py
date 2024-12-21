@@ -144,7 +144,7 @@ class ContentAnalysisAgent:
         ])
 
         # Create AI Agent with Tools
-        agent = create_tool_caloling_agent(llm, tools, prompt)
+        agent = create_tool_calling_agent(llm, tools, prompt)
         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
         agent_result = agent_executor.invoke({"article": article})
 
@@ -385,6 +385,10 @@ class AgentState(TypedDict):
     non_facts_dict: dict
     opinions_dict: dict
     content_analysis_biblio: dict
+    tone: str
+    tone_explanation: str
+    bias: str
+    bias_explanation: str
     author_publisher_background_check: str
     source_analysis_biblio: dict
     # soc_med_reddit_comments: dict
@@ -427,6 +431,10 @@ def run_content_analysis(state: AgentState) -> AgentState:
     state["facts_dict"] = formatted_json["factual"]
     state["non_facts_dict"] = formatted_json["non_factual"]
     state["opinions_dict"] = formatted_json["opinionated"]
+    state["tone"] = formatted_json["tone"]
+    state["tone_explanation"] = formatted_json["tone_explanation"]
+    state["bias"] = formatted_json["bias"]
+    state["bias_explanation"] = formatted_json["bias_explanation"]
     state["content_analysis_biblio"] = formatted_json["tavily_search"]
     return state
 
@@ -518,8 +526,8 @@ if __name__ == "__main__":
      ##  ------------------------ CONTENT ANALYSIS AREA ------------------------
 
     # if api_key and tavily_api_key:
-    agent = ContentAnalysisAgent()
-    result = json.loads(agent.analyze_content(test_article, api_key, tavily_api_key)['output'])
+    # agent = ContentAnalysisAgent()
+    # result = json.loads(agent.analyze_content(test_article, api_key, tavily_api_key)['output'])
     # else:
         # print("Skipping OpenAI test - no API key found in environment variables")
 
@@ -565,22 +573,22 @@ if __name__ == "__main__":
     #     print(post_info)
 
     ##  ------------------------ LANGRAPH AREA ------------------------
-    # # Create orchestrator
-    # orchestrator = NewsAnalysisOrchestrator()
+    # Create orchestrator
+    orchestrator = NewsAnalysisOrchestrator()
 
-    # # Test article
-    # test_article = {
-    #     "text": test_article,
-    #     "author": "Jonathan Moylan",
-    #     "publisher": "New York Times"
-    # }
+    # Test article
+    test_article = {
+        "text": test_article,
+        "author": "Jonathan Moylan",
+        "publisher": "New York Times"
+    }
 
-    # # Run analysis
-    # result = orchestrator.analyze_article(
-    #     test_article["text"],
-    #     test_article["author"],
-    #     test_article["publisher"]
-    # )
+    # Run analysis
+    result = orchestrator.analyze_article(
+        test_article["text"],
+        test_article["author"],
+        test_article["publisher"]
+    )
 
     # Print or save results
     print(json.dumps(result, indent=2))

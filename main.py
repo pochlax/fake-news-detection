@@ -68,21 +68,16 @@ def analyze_article():
         # Extract article information
         article_info = extract_article_info(url)
         
-        # # Run analysis
-        # result = orchestrator.analyze_article(
-        #     article=article_info['article'],
-        #     author=article_info['author'],
-        #     publisher=article_info['publisher']
-        # )
-        
-        # # Add metadata to result
-        # result.update({
-        #     "analyzed_url": url,
-        #     "title": article_info['title'],
-        #     "publish_date": article_info['publish_date']
-        # })
+        # Run analysis
+        result = orchestrator.analyze_article(
+            article=article_info['article'],
+            author=article_info['author'],
+            publisher=article_info['publisher']
+        )
 
-        result = article_info
+        result.update(article_info)
+
+        # result = article_info
         
         return jsonify(result), 200
 
