@@ -25,6 +25,10 @@ export default function ArticleAnalyzer() {
   const [biasExplanation, setBiasExplanation] = useState<string>('');
   const [supportedClaims, setSupportedClaims] = useState<string>('');
 
+  const [authorTrustability, setAuthorTrustability] = useState<string>('');
+  const [publisherTrustability, setPublisherTrustability] = useState<string>('');
+  const [authorPublisherExplanation, setAuthorPublisherExplanation] = useState<string>('');
+
   const handleAnalyze = async () => {
     try {
       setIsAnalyzing(true);
@@ -52,6 +56,10 @@ export default function ArticleAnalyzer() {
       setBias(result.bias || 'Unknown');
       setBiasExplanation(result.bias_explanation || '');
       setSupportedClaims(result.supported_claims || '');
+
+      setAuthorTrustability(result.author_trustability || '');
+      setPublisherTrustability(result.publisher_trustability || '');
+      setAuthorPublisherExplanation(result.author_publisher_explanation || '');
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -93,6 +101,12 @@ export default function ArticleAnalyzer() {
       'Reasonably-Supported': 'text-blue-600',
       'Speculative/ Anecdotal': 'text-yellow-600',
       'Misleading': 'text-red-600',
+
+      // Trustability colors
+      'Trusted': 'text-green-600',
+      'Somewhat-Reliable': 'text-blue-600',
+      'Questionable': 'text-yellow-600',
+      'Untrustable': 'text-red-600',
     };
     return colorMap[value] || 'text-gray-600';
   };
@@ -137,6 +151,39 @@ export default function ArticleAnalyzer() {
     };
     if (supportedClaims && supportedClaims in claimScores) {
       score += claimScores[supportedClaims];
+      total += 100;
+    }
+
+    // Calculate percentage (if no categories are available, return 0)
+    return total > 0 ? Math.round((score / total) * 100) : 0;
+  };
+
+  // Add function to calculate content score
+  const calculateSourceScore = (): number => {
+    let score = 0;
+    let total = 0;
+
+    // Score based on author (0-100)
+    const authorScores: Record<string, number> = {
+      'Trusted': 100,
+      'Somewhat-Reliable': 75,
+      'Questionable': 50,
+      'Untrustable': 25
+    };
+    if (authorTrustability && authorTrustability in authorScores) {
+      score += authorScores[authorTrustability];
+      total += 100;
+    }
+
+    // Score based on publisher (0-100)
+    const publisherScores: Record<string, number> = {
+      'Trusted': 100,
+      'Somewhat-Reliable': 75,
+      'Questionable': 50,
+      'Untrustable': 25
+    };
+    if (publisherTrustability && publisherTrustability in publisherScores) {
+      score += publisherScores[publisherTrustability];
       total += 100;
     }
 
@@ -295,21 +342,32 @@ export default function ArticleAnalyzer() {
                   <AccordionTrigger>
                     <div className="flex items-center gap-2">
                       Source Credibility
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-600">
-                        85%
-                      </span>
+                      {articleContent && ( // Only show score if article content exists
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(calculateSourceScore())}`}>
+                          {calculateSourceScore()}%
+                        </span>
+                      )}
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="grid gap-2 text-sm">
                       <div className="flex justify-between">
-                        <span>Author Expertise</span>
-                        <span className="font-medium text-green-600">High</span>
+                        <span>Author Trustability</span>
+                        <span className={`font-medium ${getAnalysisColor('authorTrustability', authorTrustability)}`}>
+                          {authorTrustability || 'Analyzing...'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Publisher Reputation</span>
-                        <span className="font-medium text-green-600">Trusted</span>
+                        <span className={`font-medium ${getAnalysisColor('publisherTrustability', publisherTrustability)}`}>
+                          {publisherTrustability || 'Analyzing...'}
+                        </span>
                       </div>
+                      {authorPublisherExplanation && (
+                        <div className="mt-1 text-xs text-gray-600">
+                          {authorPublisherExplanation}
+                        </div>
+                      )}
                     </div>
                   </AccordionContent>
                 </AccordionItem>

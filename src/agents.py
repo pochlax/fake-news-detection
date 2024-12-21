@@ -328,6 +328,10 @@ Your job is to look for evidence that the author or news organization has publis
 You can use the Tavily Search tool to confirm the factual statements (if needed). 
 
 Return the response as a JSON object with the following structure:
+"author_trustability": "The trustability of the author. The only return should be one of the following: Untrustable, Questionable, Somewhat-Reliable, Trusted.",
+"publisher_trustability": "The trustability of the publisher. The only return should be one of the following: Untrustable, Questionable, Somewhat-Reliable, Trusted.",
+If the author or publisher has no history of misinformation, return "Somewhat-Reliable". If they have at most one case of misinformation, return "Questionable". If they have more than one, return "Untrustable". 
+If the author or publisher has a long history of publishing articles without any history of misinformation, return "Trustable".
 "findingsSummary": "A summary of the findings made about the author and news organization. Talk about the topic that the previous misleading article was on. Limit the summary to 150 words.",
 "tavily_search": ["List of sources used here..."],
 
@@ -336,8 +340,10 @@ If there is no evidence of publishing fake articles, the findingsSummary must de
 Examples:
 
 \'{{
-  "findingsSummary": "The source has no previous history of publishing misinformation! Megan Griffith-Greene was associated with an article on Yelp, Google, and UrbanSpoon being targets for fake reviews. 
-  CBC has covered topics related to disinformation and fake news, emphasizing the importance of verifying sources, particularly on social media platforms. ",
+  "author_trustability": "Somewhat-Reliable",
+  "publisher_trustability": "Trusted",
+  "findingsSummary": "The source has no previous history of publishing misinformation! Megan Griffith-Greene is known for her role as the service journalism editor at The Washington Post and the Philadelphia Inquirer. 
+  CBC/Radio-Canada is a public broadcaster known for its value, impact, and behind-the-scenes stories.",
   "tavily_search": [
     "https://www.linkedin.com/in/megangriffithgreene",
     "https://www.cbc.ca/news/science/fake-news-disinformation-propaganda-internet-1.5196964"
@@ -348,6 +354,8 @@ Examples:
 class SourceAnalysisAgent:
     def __init__(self):
         self.findingsSummary = ""
+        self.author_trustability = ""
+        self.publisher_trustability = ""
         self.tavily_search = []
     
 
@@ -394,7 +402,9 @@ class AgentState(TypedDict):
     bias_explanation: str
     supported_claims: str
     content_analysis_biblio: dict
-    author_publisher_background_check: str
+    author_trustability: str
+    publisher_trustability: str
+    author_publisher_explanation: str
     source_analysis_biblio: dict
     # soc_med_reddit_comments: dict
     # social_media_biblio: dict
@@ -418,7 +428,9 @@ def run_source_analysis(state: AgentState) -> AgentState:
     )
     # state["source_analysis"] = result
     formatted_json = json.loads(result["output"])
-    state["author_publisher_background_check"] = formatted_json["findingsSummary"]
+    state["author_trustability"] = formatted_json["author_trustability"]
+    state["publisher_trustability"] = formatted_json["publisher_trustability"]
+    state["author_publisher_explanation"] = formatted_json["findingsSummary"]
     state["source_analysis_biblio"] = formatted_json["tavily_search"]
     return state
 
