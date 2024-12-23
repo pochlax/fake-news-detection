@@ -10,7 +10,8 @@ from pydantic import BaseModel, Field
 from transformers import pipeline
 from statistics import mean
 
-from langchain_community.llms import OpenAI
+# from langchain_community.llms import OpenAI
+from openai import OpenAI
 from langchain_openai import ChatOpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
@@ -25,6 +26,8 @@ from langchain.tools import BaseTool
 from langchain_community.tools.reddit_search.tool import RedditSearchSchema
 
 from langgraph.graph import StateGraph, END
+
+from social_media_agents import SocialMediaAgent
 
 # from langchain.chains import SequentialChain
 
@@ -153,171 +156,6 @@ class ContentAnalysisAgent:
         agent_result = agent_executor.invoke({"article": article})
 
         return agent_result
-        
-
-social_media_analysis_prompt = """
-You are an expert at searching Reddit and analyzing the sentiment of a topic from comments.
-
-You will be provided a summary of an article as input.
-
-Your job is to determine keywords and search terms to look up threads on Reddit that are related to the topic. Afterwards, write a summary of the sentiments.
-You can use the Reddit Search Tool to extract the comments and perform sentiment analysis. The tool takes in comments as input and outputs the sentiment results
-
-Return the response as a JSON object with the following structure:
-"sentiments": ["List of sentiment results here..."],
-"findingsSummary":  "A summary of the sentiment results that are more understandable to readers. Limit the analysis to 100 words", 
-
-Note that the sentiments list should be the output returned from the Reddit Search Tool
-"""
-
-class RedditInput(BaseModel):
-    query: str = Field(description="The search query for Reddit")
-
-class CustomRedditAPITool(BaseTool):
-    name: str = "reddit_search"
-    description: str = "Search Reddit for information about a topic"
-    args_schema: Type[BaseModel] = RedditInput
-    _reddit_client: Optional[any] = None
-    sentiment_analyzer: any = None
-
-    def __init__(self, client_id: str, client_secret: str, user_agent: str):
-        super().__init__()
-        self._reddit_client = praw.Reddit(
-            client_id=client_id,
-            client_secret=client_secret,
-            user_agent=user_agent
-        )
-
-        # Initialize sentiment analyzer
-        self.sentiment_analyzer = pipeline("sentiment-analysis")
-
-    def get_comments(self, submission) -> List[str]:
-        """Extract all comments from a submission"""
-        submission.comments.replace_more(limit=None)  # Get all comments
-        comments = []
-        for comment in submission.comments.list():
-            if comment.body:  # Ensure comment has content
-                comments.append(comment.body)
-                if len(comments) >= 50:
-                    break
-        return comments
-
-    def analyze_sentiment(self, comments: List[str]) -> Dict:
-        """Analyze sentiment of comments"""
-        if not comments:
-            return {"positive": 0, "negative": 0, "neutral": 0, "average_score": 0}
-
-        sentiments = []
-        sentiment_counts = {"positive": 0, "negative": 0, "neutral": 0}
-
-        for comment in comments:
-            try:
-                result = self.sentiment_analyzer(comment)[0]
-                label = result['label']
-                score = result['score']
-                
-                sentiment_counts[label.lower()] += 1
-                sentiments.append(score if label == "POSITIVE" else -score)
-            except Exception as e:
-                print(f"Error analyzing comment: {e}")
-                continue
-
-        return {
-            "positive": sentiment_counts["positive"],
-            "negative": sentiment_counts["negative"],
-            "neutral": sentiment_counts["neutral"],
-            "average_score": mean(sentiments) if sentiments else 0
-        }
-
-    def _run(self, query: str) -> str:
-        try: 
-            # Search for top posts
-            subreddit = self._reddit_client.subreddit("all")
-            print("Currently looking for this query: " + query)
-            top_posts = list(subreddit.search(query, sort='relevance', time_filter='all', limit=3, params={'include_over_18': 'off'}))
-            
-            results = []
-            overall_sentiments = []
-            
-            for post in top_posts:
-                # Get post details
-                post_info = f"\nPost Title: {post.title}\nScore: {post.score}\nURL: {post.url}\n"
-                results.append(post_info)
-                
-                # Get and analyze comments
-                comments = self.get_comments(post)
-                sentiment_analysis = self.analyze_sentiment(comments)
-                overall_sentiments.append(sentiment_analysis)
-                
-                # Add sentiment analysis results
-                sentiment_info = f"""
-                Sentiment Analysis for {len(comments)} comments:
-                - Positive comments: {sentiment_analysis['positive']}
-                - Negative comments: {sentiment_analysis['negative']}
-                - Neutral comments: {sentiment_analysis['neutral']}
-                - Average sentiment score: {sentiment_analysis['average_score']:.2f}
-                """
-                results.append(sentiment_info)
-
-            # Calculate overall sentiment
-            if overall_sentiments:
-                total_positive = sum(s['positive'] for s in overall_sentiments)
-                total_negative = sum(s['negative'] for s in overall_sentiments)
-                total_neutral = sum(s['neutral'] for s in overall_sentiments)
-                avg_score = mean([s['average_score'] for s in overall_sentiments])
-                
-                overall_summary = f"""
-                Overall Sentiment Analysis:
-                Total Comments Analyzed: {total_positive + total_negative + total_neutral}
-                Total Positive: {total_positive}
-                Total Negative: {total_negative}
-                Total Neutral: {total_neutral}
-                Average Sentiment Score: {avg_score:.2f}
-                """
-                results.append(overall_summary)
-
-            # return "\n".join(results)
-            return results
-
-        except Exception as e:
-            return f"Error searching Reddit: {str(e)}"
-
-class SocialMediaAgent:
-    def __init__(self):
-        self.social_media_sentiment = []
-
-        
-    def analyze_social_media(self, article: str, api_key: str, reddit_client_id: str, reddit_secret: str, user_agent: str) -> List[Dict]:
-        # llm = OpenAI(api_key=api_key)  
-        llm = ChatOpenAI(
-            api_key=api_key,
-            model="gpt-3.5-turbo",
-            temperature=1.3
-        )
-
-        reddit_search = CustomRedditAPITool(reddit_api_id, reddit_api_secret, reddit_user_agent)
-        tools = [reddit_search] 
-
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", social_media_analysis_prompt),
-            ("human", "Here's the article: {article}"),
-            ("placeholder", "{agent_scratchpad}"),
-        ])
-
-        # Create Simple LLM chain
-        # chain = LLMChain(llm=llm, prompt=prompt)
-        # chain_result = chain.invoke({"article": article})
-
-
-        # Create agent with tools
-        agent = create_tool_calling_agent(llm, tools, prompt)
-        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-        agent_result = agent_executor.invoke({"article": article})
-
-        formatted_json = json.dumps(agent_result, indent=2)
-        print(formatted_json)
-        return formatted_json
-
 
 source_analysis_prompt = """
 You are an expert on checking background information on authors as well as news organizations.
@@ -401,15 +239,15 @@ class AgentState(TypedDict):
     bias: str
     bias_explanation: str
     supported_claims: str
+    # content_sentiment: dict
     content_analysis_biblio: dict
     author_trustability: str
     publisher_trustability: str
     author_publisher_explanation: str
     source_analysis_biblio: dict
-    # soc_med_reddit_comments: dict
-    # social_media_biblio: dict
-    # content_sentiment: dict
-    # reddit_comments_sentiment: dict
+    reddit_posts: List[dict]
+    reddit_comments_sentiment: int
+    reddit_sentiment_summary: str
     source_analysis: dict
     content_analysis: dict
     article_summary: str
@@ -456,6 +294,34 @@ def run_content_analysis(state: AgentState) -> AgentState:
     state["content_analysis_biblio"] = formatted_json["tavily_search"]
     return state
 
+def run_social_media_analysis(state: AgentState) -> AgentState:
+    """Analyze social media and generate summary"""
+
+    social_media_agent = SocialMediaAgent(
+        os.getenv("OPENAI_API_KEY"),
+        os.getenv("REDDIT_CLIENT_ID"), 
+        os.getenv("REDDIT_CLIENT_SECRET"), 
+        os.getenv("REDDIT_USER_AGENT")
+    )
+
+    result = social_media_agent.analyze_social_media(
+        state["input_article"]
+    )
+
+    total_sentiment = 0
+    
+    if result['success']:
+        for post in result['posts']:
+            sentiment = social_media_agent.sentiment_analyzer.analyze_sentiment(post['comments'])
+            post['sentiment'] = sentiment
+            total_sentiment += sentiment['average_score']
+            del post['comments']
+
+    state['reddit_posts'] = result['posts']
+    state['reddit_comments_sentiment'] = max(0, min(100, round(total_sentiment * 100)))
+    state['reddit_sentiment_summary'] = social_media_agent._summarize_sentiment(result['posts'])
+    return state
+
 def fake_news_analysis_workflow():
     # Initialize the graph
     workflow = StateGraph(AgentState)
@@ -463,14 +329,14 @@ def fake_news_analysis_workflow():
     # Add nodes
     workflow.add_node("run_source", run_source_analysis)
     workflow.add_node("run_content", run_content_analysis)
-    # workflow.add_node("run_social", run_social_media_analysis)
+    workflow.add_node("run_social", run_social_media_analysis)
     # workflow.add_node("run_combination", run_output_combination)
 
     # Define the flow
     workflow.add_edge("run_content", "run_source")
-    # workflow.add_edge("run_content", "run_social")
+    workflow.add_edge("run_source", "run_social")
     # workflow.add_edge("run_social", "run_combination")
-    workflow.add_edge("run_source", END)
+    workflow.add_edge("run_social", END)
 
     # Set entry point
     workflow.set_entry_point("run_content")
@@ -556,39 +422,10 @@ if __name__ == "__main__":
 
      ##  ------------------------ SOSMED ANALYSIS AREA ------------------------
 
-    # # Experimenting with Reddit API Tool
-    # reddit_api_id = os.getenv("REDDIT_CLIENT_ID")
-    # reddit_api_secret = os.getenv("REDDIT_CLIENT_SECRET")
-    # reddit_user_agent = os.getenv("REDDIT_USER_AGENT")
-
-    # agent = SocialMediaAgent() 
-    # result = agent.analyze_social_media(random_fake_article_2, api_key, reddit_api_id, reddit_api_secret, reddit_user_agent)
-    # if reddit_api_id and reddit_api_secret:
-    #     reddit_tool = CustomRedditAPITool(reddit_api_id, reddit_api_secret, reddit_user_agent)
-    #     testing_results = reddit_tool._run("Yoon Suk Yeol")
-    #     print(testing_results)
-
-    # query = "pesticide in tea"
-
-    # subreddit = praw.Reddit(
-    #         client_id=reddit_api_id,
-    #         client_secret=reddit_api_secret,
-    #         user_agent=reddit_user_agent
-    #     ).subreddit("all")
-
-    # top_posts = list(subreddit.search(
-    #     query,
-    #     sort='relevance',
-    #     time_filter='all',
-    #     limit=10,
-    #     params={'include_over_18': 'off'}  # Filter NSFW content
-    # ))
-    # # print(top_posts)
-
-    # for post in top_posts:
-    #     # Get post details
-    #     post_info = f"\nPost Title: {post.title}\nScore: {post.score}\nURL: {post.url}\n"
-    #     print(post_info)
+    # Experimenting with Reddit API Tool
+    reddit_api_id = os.getenv("REDDIT_CLIENT_ID")
+    reddit_api_secret = os.getenv("REDDIT_CLIENT_SECRET")
+    reddit_user_agent = os.getenv("REDDIT_USER_AGENT")
 
     ##  ------------------------ LANGRAPH AREA ------------------------
     # Create orchestrator

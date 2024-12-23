@@ -102,6 +102,25 @@ class SocialMediaAgent:
         self.reddit_tool = RedditSearchTool(reddit_api_id, reddit_api_secret, reddit_user_agent)
         self.sentiment_analyzer = SentimentAnalyzer()
 
+    def _summarize_sentiment(self,  posts: List[Dict]) -> str:
+        summary_prompt = """
+        Generate a 50 words summary of the sentiment of the following Reddit posts.
+
+        Reddit posts with Sentiment Values:
+        {posts}
+        """
+
+        # Format posts for evaluation
+        posts_text = "\n\n".join([
+            f"Post {i+1}:\nTitle: {post['title']}\n Sentiment: {post['sentiment']['average_score']}"
+            for i, post in enumerate(posts)
+        ])
+
+        return self.llm.predict(
+            summary_prompt.format(posts=posts_text)
+        ).lower()
+
+
     def _evaluate_relevance(self, article_summary: str, posts: List[Dict]) -> List[bool]:
         """
         Evaluate if each post is relevant to the article summary
@@ -261,10 +280,11 @@ if __name__ == "__main__":
         for post in result['posts']:
             sentiment = agent.sentiment_analyzer.analyze_sentiment(post['comments'])
             post['sentiment'] = sentiment
+            del post['comments']
+
+    result['findingsSummary'] = agent._summarize_sentiment(result['posts'])
             
     print(json.dumps(result, indent=2))
-
-
 
     # print(reddit_api_id, reddit_api_secret, reddit_user_agent)
 
