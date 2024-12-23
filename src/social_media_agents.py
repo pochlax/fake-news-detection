@@ -8,6 +8,9 @@ from langchain.tools import BaseTool
 from langchain.agents import AgentType, initialize_agent
 from langchain_openai import ChatOpenAI
 
+from transformers import pipeline
+from statistics import mean
+
 class RedditPost(BaseModel):
     """Schema for Reddit post data"""
     title: str
@@ -56,10 +59,48 @@ class RedditSearchTool(BaseTool):
         except Exception as e:
             return f"Error searching Reddit: {str(e)}"
 
+class SentimentAnalyzer:
+    sentiment_model = None
+
+    def __init__(self):
+        # Initialize sentiment analyzer
+        self.sentiment_model = pipeline("sentiment-analysis")
+
+
+    def analyze_sentiment(self, comments: List[str]) -> str:
+        """Analyze sentiment of comments"""
+        if not comments:
+            return {"positive": 0, "negative": 0, "neutral": 0, "average_score": 0}
+
+        sentiments = []
+        sentiment_counts = {"positive": 0, "negative": 0, "neutral": 0}
+
+        for comment in comments:
+            try:
+                result = self.sentiment_model(comment)[0]
+                label = result['label']
+                score = result['score']
+                
+                sentiment_counts[label.lower()] += 1
+                sentiments.append(score if label == "POSITIVE" else -score)
+            except Exception as e:
+                print(f"Error analyzing comment: {e}")
+                continue
+
+        return {
+            "positive": sentiment_counts["positive"],
+            "negative": sentiment_counts["negative"],
+            "neutral": sentiment_counts["neutral"],
+            "average_score": mean(sentiments) if sentiments else 0
+        }
+    
+
+
 class SocialMediaAgent:
     def __init__(self, api_key: str, reddit_api_id: str, reddit_api_secret: str, reddit_user_agent: str):
         self.llm = ChatOpenAI(temperature=0, model="gpt-4o", api_key=api_key)
         self.reddit_tool = RedditSearchTool(reddit_api_id, reddit_api_secret, reddit_user_agent)
+        self.sentiment_analyzer = SentimentAnalyzer()
 
     def _evaluate_relevance(self, article_summary: str, posts: List[Dict]) -> List[bool]:
         """
@@ -111,7 +152,7 @@ class SocialMediaAgent:
         Generate a search query to find Reddit threads about the article topic.
         Make each attempt different from previous ones. Cannot use the same words.
         Keep the query concise (1-3 words). 
-        The query should not use the word "Reddit"
+        The query should not use the word "Reddit" or "Toxic Tea Brands"
         
         Article summary: {article_summary}
         Attempt number: {attempt}
@@ -135,24 +176,7 @@ class SocialMediaAgent:
                 # Check if posts are lists (not error messages)
                 if not isinstance(posts, list):
                     continue
-                
-                # Evaluate relevance
-                # if posts and self._evaluate_relevance(article_summary, posts):
-                #     return {
-                #         "success": True,
-                #         "query_used": query,
-                #         "attempt_number": attempt,
-                #         "posts": posts
-                #     }
-
-                # print(posts)
-                # relevance_matrix = self._evaluate_relevance(article_summary, posts)
-                # print(relevance_matrix)
-
-                # for post_index in range(1, len(posts) + 1):
-                #     if relevance_matrix[post_index]:
-                #         posts_with_comments.append(posts[post_index])
-
+            
                 # Evaluate relevance for each post
                 relevance = self._evaluate_relevance(article_summary, posts)
                 
@@ -165,6 +189,15 @@ class SocialMediaAgent:
                 posts_with_comments.extend(relevant_posts)
 
                 if len(posts_with_comments) >= 2:
+                    # result = {
+                    #     "success": True,
+                    #     "queries_used": [
+                    #         self._generate_search_query(article_summary, i) 
+                    #         for i in range(1, attempt + 1)
+                    #     ],
+                    #     "attempt_number": attempt,
+                    #     "posts": posts_with_comments
+                    # }
                     return {
                         "success": True,
                         "queries_used": [
@@ -186,6 +219,12 @@ class SocialMediaAgent:
                         ],
                         "posts": []
                     }
+
+            # for post in posts_with_comments:
+            #     sentiment = self.sentiment_analyzer.analyze_sentiment(post.comments)
+            #     post["sentiment"] = sentiment
+
+            # return result
 
         except Exception as e:
             return {
@@ -218,6 +257,14 @@ if __name__ == "__main__":
     agent = SocialMediaAgent(api_key, reddit_api_id, reddit_api_secret, reddit_user_agent)
     result = agent.analyze_social_media(test_article)
     print(json.dumps(result, indent=2))
+    if result['success']:
+        for post in result['posts']:
+            sentiment = agent.sentiment_analyzer.analyze_sentiment(post['comments'])
+            post['sentiment'] = sentiment
+            
+    print(json.dumps(result, indent=2))
+
+
 
     # print(reddit_api_id, reddit_api_secret, reddit_user_agent)
 
