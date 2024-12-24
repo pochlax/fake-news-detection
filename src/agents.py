@@ -26,8 +26,7 @@ from langchain.tools import BaseTool
 from langchain_community.tools.reddit_search.tool import RedditSearchSchema
 
 from langgraph.graph import StateGraph, END
-
-from social_media_agents import SocialMediaAgent
+from .social_media_agents import SocialMediaAgent
 
 # from langchain.chains import SequentialChain
 
@@ -246,7 +245,8 @@ class AgentState(TypedDict):
     author_publisher_explanation: str
     source_analysis_biblio: dict
     reddit_posts: List[dict]
-    reddit_comments_sentiment: int
+    reddit_comments_sentiment: str
+    reddit_sentiment_value: int
     reddit_sentiment_summary: str
     source_analysis: dict
     content_analysis: dict
@@ -294,6 +294,16 @@ def run_content_analysis(state: AgentState) -> AgentState:
     state["content_analysis_biblio"] = formatted_json["tavily_search"]
     return state
 
+def categorize_value(x):
+    if 67 <= x <= 100:
+        return "Positive"
+    elif 34 <= x <= 66:
+        return "Mixed"
+    elif 0 <= x <= 33:
+        return "Negative"
+    else:
+        return "Invalid"
+
 def run_social_media_analysis(state: AgentState) -> AgentState:
     """Analyze social media and generate summary"""
 
@@ -317,8 +327,11 @@ def run_social_media_analysis(state: AgentState) -> AgentState:
             total_sentiment += sentiment['average_score']
             del post['comments']
 
+    total_sentiment = max(0, min(100, round(total_sentiment * 100)))
+
     state['reddit_posts'] = result['posts']
-    state['reddit_comments_sentiment'] = max(0, min(100, round(total_sentiment * 100)))
+    state['reddit_comments_sentiment'] = categorize_value(total_sentiment)
+    state['reddit_sentiment_value'] = total_sentiment
     state['reddit_sentiment_summary'] = social_media_agent._summarize_sentiment(result['posts'])
     return state
 

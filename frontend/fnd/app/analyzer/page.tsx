@@ -29,6 +29,12 @@ export default function ArticleAnalyzer() {
     const [publisherTrustability, setPublisherTrustability] = useState<string>('');
     const [authorPublisherExplanation, setAuthorPublisherExplanation] = useState<string>('');
 
+
+    const [socialSentiment, setSocialSentiment] = useState<string>('');
+    const [socialSentimentExplanation, setSocialSentimentExplanation] = useState<string>('');
+
+    const [socialScore, setSocialScore] = useState<number>(0);
+
     const handleAnalyze = async () => {
         try {
             setIsAnalyzing(true);
@@ -60,6 +66,10 @@ export default function ArticleAnalyzer() {
             setAuthorTrustability(result.author_trustability || '');
             setPublisherTrustability(result.publisher_trustability || '');
             setAuthorPublisherExplanation(result.author_publisher_explanation || '');
+
+            setSocialSentiment(result.reddit_comments_sentiment || '');
+            setSocialScore(result.reddit_sentiment_value || 0);
+            setSocialSentimentExplanation(result.reddit_sentiment_summary || '');
 
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
@@ -107,6 +117,11 @@ export default function ArticleAnalyzer() {
             'Somewhat-Reliable': 'text-blue-600',
             'Questionable': 'text-yellow-600',
             'Untrustable': 'text-red-600',
+
+            // Social Sentiment colors
+            'Positive': 'text-green-600',
+            'Mixed': 'text-blue-600',
+            'Negative': 'text-red-600',
         };
         return colorMap[value] || 'text-gray-600';
     };
@@ -377,21 +392,30 @@ export default function ArticleAnalyzer() {
                                     <AccordionTrigger>
                                         <div className="flex items-center gap-2">
                                             Social Analysis
-                                            <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-600">
-                                                75%
-                                            </span>
+                                            {articleContent && ( // Only show score if article content exists
+                                                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(socialScore)}`}>
+                                                    {socialScore}%
+                                                </span>
+                                            )}
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent>
                                         <div className="grid gap-2 text-sm">
                                             <div className="flex justify-between">
-                                                <span>Social Sentiment</span>
-                                                <span className="font-medium text-yellow-600">Mixed</span>
+                                                <span>Social Sentiment (Reddit)</span>
+                                                <span className={`font-medium ${getAnalysisColor('socialSentiment', socialSentiment)}`}>
+                                                    {socialSentiment || 'Analyzing...'}
+                                                </span>
                                             </div>
-                                            <div className="flex justify-between">
+                                            {socialSentimentExplanation && (
+                                                <div className="mt-1 text-xs text-gray-600">
+                                                    {socialSentimentExplanation}
+                                                </div>
+                                            )}
+                                            {/* <div className="flex justify-between">
                                                 <span>Share Pattern</span>
                                                 <span className="font-medium text-green-600">Organic</span>
-                                            </div>
+                                            </div> */}
                                         </div>
                                     </AccordionContent>
                                 </AccordionItem>
