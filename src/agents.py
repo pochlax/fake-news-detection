@@ -5,7 +5,7 @@ import praw
 import torch
 
 from dotenv import load_dotenv
-from typing import List, Dict, Optional, Type, TypedDict
+from typing import List, Dict, Optional, Type, TypedDict, Union
 from pydantic import BaseModel, Field
 from transformers import pipeline
 from statistics import mean
@@ -26,40 +26,92 @@ from langchain.tools import BaseTool
 from langchain_community.tools.reddit_search.tool import RedditSearchSchema
 
 from langgraph.graph import StateGraph, END
-from .social_media_agents import SocialMediaAgent
-
-# from langchain.chains import SequentialChain
-
-# class SectionContent:
-#     def __init__(self, title: str, content: str):
-#         self.title = title
-#         self.content = content
+# from social_media_agents import SocialMediaAgent # Use when testing from agents.py
+from .social_media_agents import SocialMediaAgent # Use when testing from main.py
     
-report_structure_prompt = """
-This report focuses on analyzing the credibility of an article.
+report_writer_prompt = """
+Write a report summarizing the findings ofthe credibility of an article.
 
-The report will be structured as follows:
+Using the provided information, create a credibility assessment report.
 
-1. Introduction:
-- Title: The title of the article
-- Summary: A short summary of the article. Maximum of 100 words.
+Input Information:
+- Number of Facts: {factual_length}
+- Number of Non-facts and Opinions: {non_factual_and_opinion_length}
+- Tone: {tone}
+- Tone Explanation: {tone_explanation}
+- Bias: {bias}
+- Bias Explanation: {bias_explanation}
+- Supported Claims: {supported_claims}
+- Author Trustability: {author_trustability}
+- Publisher Trustability: {publisher_trustability}
+- Reddit Sentiment Summary: {reddit_sentiment_summary}
 
-2. Main Body Section:
-- Content Analysis: A detailed analysis of the article's content. Specifically, a detailed explanation 
-of the non-factual (speculative,hypothetical, etc.) and opinions made in the article. Explain any confirmation bias
-if detected.
+Return ONLY a JSON object with exactly two fields:
+1. "recommendation": A detailed explanation of the article's credibility based on content analysis, source analysis, and social media sentiment
+2. "recommendation_score": A number between 0-100 representing overall credibility
 
-- 
-
-3. Conclusion:
-- Recommendation: A recommendation on whether the article is credible or not.
+Example output:
+\'{{
+    "recommendation": "Based on analysis, this article shows strong credibility with factual content and balanced reporting, though source reliability raises some concerns...",
+    "recommendation_score": 75
+}}\'
 """
 
-# Additional analysis that will be enhanced later.
-# - Sentiment Analysis: Detects the sentiment of the article. Explains if the article is biased towards a particular side.
-# - Social Media Analysis: Analyzes the sentiment of the article's topic on social media. Verifies if the article tone is 
-# consistent with the sentiment of the social media.
-# - Source Analysis: Checks the credibility of the source of the article.
+# The report will be structured as follows:
+
+# 1. Introduction:
+# - Title: The title of the article
+# - Summary: A short summary of the article. Maximum of 100 words.
+
+# 2. Main Body Section:
+# - Content Analysis: A detailed analysis of the article's content. Specifically, a detailed explanation 
+# of the non-factual (speculative,hypothetical, etc.) and opinions made in the article. Explain how the tone and bias 
+# of the article supports or misleads the reader.
+
+# - Source Analysis: A detailed analysis of the author's background and credibility of the source organization.
+
+# - Social Media Analysis: A detailed analysis of the sentiment of the article's topic on social media. Verifies if the article tone is 
+# consistent with the sentiment on social media.
+
+# 3. Conclusion:
+# - Recommendation: A recommendation on whether the article is credible or not. Use the findings from the content analysis (tone, bias, ratio of 
+# factual to non-factual and opinionated claims), source analysis(author and publisher trustability), and social media sentiment to make the recommendation.
+
+class ReportWriterAgent:
+    def __init__(self, api_key: str):
+        self.llm = ChatOpenAI(temperature=0, model="gpt-4o", api_key=api_key)
+    
+    def write_report(self, factual_length: int, 
+        non_factual_and_opinion_length: int, 
+        tone: str, 
+        tone_explanation: str, 
+        bias: str, 
+        bias_explanation: str, 
+        supported_claims: str, 
+        author_trustability: str, 
+        publisher_trustability: str,
+        reddit_sentiment_summary: str
+    ) -> str:
+        
+        response = self.llm.predict(
+            report_writer_prompt.format(
+                factual_length=factual_length, 
+                non_factual_and_opinion_length=non_factual_and_opinion_length, 
+                tone=tone, 
+                tone_explanation=tone_explanation, 
+                bias=bias, 
+                bias_explanation=bias_explanation, 
+                supported_claims=supported_claims, 
+                author_trustability=author_trustability, 
+                publisher_trustability=publisher_trustability, 
+                reddit_sentiment_summary=reddit_sentiment_summary
+            )
+        )
+
+         # Extract JSON string from the response by removing ```json and ``` markers
+        json_str = response.replace('```json', '').replace('```', '').strip()
+
+        return json_str
 
 
 content_analysis_prompt = """
@@ -84,7 +136,8 @@ or opinionated, return "Speculative/ Anecdotal". Else, return "Misleading".
 "findingsSummary": " A summarry of how the non-factual and opinionated sections detected might mislead the reader. 
 Pick the most important findings and limit the summary to 150 words. If there are no non-factual or opinionated sections, 
 default to "No non-factual or opinionated sections detected.",
-"tavily_search": ["List of sources used to confirm factual statements here..."]
+"tavily_search": ["List of sources used to confirm factual statements here..."],
+"article_summary": A summary of the article. Limit the summary to 150 words.
 """
 
 # # Old version of prompt 
@@ -238,6 +291,7 @@ class AgentState(TypedDict):
     bias: str
     bias_explanation: str
     supported_claims: str
+    content_analysis: str
     # content_sentiment: dict
     content_analysis_biblio: dict
     author_trustability: str
@@ -252,8 +306,8 @@ class AgentState(TypedDict):
     content_analysis: dict
     article_summary: str
     social_media_analysis: dict
-    final_output: dict
-
+    recommendation: str
+    recommendation_score: int
 # Define agent nodes
 def run_source_analysis(state: AgentState) -> AgentState:
     """Analyze source credibility"""
@@ -282,7 +336,7 @@ def run_content_analysis(state: AgentState) -> AgentState:
     )
     # state["content_analysis"] = result
     formatted_json = json.loads(result["output"])
-    state["article_summary"] = formatted_json["findingsSummary"]
+    state["article_summary"] = formatted_json["article_summary"]
     state["facts_dict"] = formatted_json["factual"]
     state["non_facts_dict"] = formatted_json["non_factual"]
     state["opinions_dict"] = formatted_json["opinionated"]
@@ -291,6 +345,7 @@ def run_content_analysis(state: AgentState) -> AgentState:
     state["bias"] = formatted_json["bias"]
     state["bias_explanation"] = formatted_json["bias_explanation"]
     state["supported_claims"] = formatted_json["supported_claims"]
+    state["content_analysis"] = formatted_json["findingsSummary"]
     state["content_analysis_biblio"] = formatted_json["tavily_search"]
     return state
 
@@ -335,6 +390,36 @@ def run_social_media_analysis(state: AgentState) -> AgentState:
     state['reddit_sentiment_summary'] = social_media_agent._summarize_sentiment(result['posts'])
     return state
 
+def run_report_writer(state: AgentState) -> AgentState:
+    """Analyze results and generate report"""
+    report_agent = ReportWriterAgent(os.getenv("OPENAI_API_KEY"))
+    # result = content_agent.analyze_content(
+    #     state["input_article"],
+    #     os.getenv("OPENAI_API_KEY"), 
+    #     os.getenv("TAVILY_API_KEY")
+    # )
+
+    result = report_agent.write_report(
+        len(state["facts_dict"]),
+        len(state["non_facts_dict"]) + len(state["opinions_dict"]),
+        state["tone"],
+        state["tone_explanation"],
+        state["bias"],
+        state["bias_explanation"],
+        state["supported_claims"],
+        state["author_trustability"],
+        state["publisher_trustability"],
+        state["reddit_sentiment_summary"]
+    )
+
+    # print(result)
+
+    formatted_json = json.loads(result)
+    state["recommendation"] = formatted_json["recommendation"]
+    state["recommendation_score"] = formatted_json["recommendation_score"]
+
+    return state
+
 def fake_news_analysis_workflow():
     # Initialize the graph
     workflow = StateGraph(AgentState)
@@ -343,13 +428,14 @@ def fake_news_analysis_workflow():
     workflow.add_node("run_source", run_source_analysis)
     workflow.add_node("run_content", run_content_analysis)
     workflow.add_node("run_social", run_social_media_analysis)
-    # workflow.add_node("run_combination", run_output_combination)
+    workflow.add_node("run_report", run_report_writer)
 
     # Define the flow
     workflow.add_edge("run_content", "run_source")
     workflow.add_edge("run_source", "run_social")
-    # workflow.add_edge("run_social", "run_combination")
-    workflow.add_edge("run_social", END)
+    # workflow.add_edge("run_social", END)
+    workflow.add_edge("run_social", "run_report")
+    workflow.add_edge("run_report", END)
 
     # Set entry point
     workflow.set_entry_point("run_content")
@@ -417,7 +503,10 @@ if __name__ == "__main__":
 
     # Access environment variables
     api_key = os.getenv("OPENAI_API_KEY")
+    # os.putenv("TAVILY_API_KEY", "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")
     tavily_api_key = os.getenv("TAVILY_API_KEY")
+
+    # os.setenv("TAVILY_API_KEY") = "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"
 
 
      ##  ------------------------ CONTENT ANALYSIS AREA ------------------------
