@@ -118,7 +118,7 @@ class SocialMediaAgent:
 
         return self.llm.predict(
             summary_prompt.format(posts=posts_text)
-        ).lower()
+        )
 
 
     def _evaluate_relevance(self, article_summary: str, posts: List[Dict]) -> List[bool]:
