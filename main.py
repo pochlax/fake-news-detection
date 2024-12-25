@@ -36,7 +36,7 @@ def extract_article_info(url: str) -> dict:
             "article": article.text,
             "author": article.authors[0] if article.authors else "Unknown",
             "publisher": urlparse(url).netloc.replace('www.', ''),
-            "title": article.title,
+            "title": article.title.title(),
             "publish_date": str(article.publish_date) if article.publish_date else None
         }
     except Exception as e:
