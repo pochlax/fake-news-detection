@@ -13,6 +13,7 @@ import { Shield, Download, Menu } from 'lucide-react'
 import { Progress } from "@/components/ui/progress"
 import { UserIcon } from "@/components/layout/UserIcon"
 import { CollapsibleSidebar } from "@/components/layout/CollapsibleSidebar"
+import { useRouter } from 'next/navigation'
 
 export default function ArticleAnalyzer() {
     const [inputUrl, setInputUrl] = useState('');
@@ -40,6 +41,12 @@ export default function ArticleAnalyzer() {
     const [recommendation, setRecommendation] = useState<string>('');
     const [recommendationScore, setRecommendationScore] = useState<number>(0);
     const [isOpen, setIsOpen] = useState(false)
+
+    const router = useRouter()
+
+    const handleLandingPage = () => {
+        router.push('/')
+    }
 
     const handleAnalyze = async () => {
         try {
@@ -249,8 +256,10 @@ export default function ArticleAnalyzer() {
                                         <Menu className="h-5 w-5" />
                                     </Button>
                                 )}
-                                <Shield className="h-5 w-5" />
-                                <h1 className="text-lg font-semibold">de(fnd)</h1>
+                                <div className="flex items-center gap-2" onClick={handleLandingPage}>
+                                    <Shield className="h-5 w-5" />
+                                    <h1 className="text-lg font-semibold">de(fnd)</h1>
+                                </div>
                             </div>
                             <div className="flex items-center gap-4">
                                 <Button variant="ghost">

@@ -1,23 +1,81 @@
-### Factual Statements:
-1. Some teas on the market contain levels of pesticides that exceed Canadian standards.
-2. Half of the teas tested contained pesticide residues above the allowable limits in Canada.
-3. CFIA tests of tea from 2009 and 2011 found that many brands had levels of pesticide residue that exceed allowed levels.
-4. CFIA testing has found the presence of pesticide residues on organic tea leaves.
-
-### Non-Factual Statements:
-1. Tea is the world’s most popular beverage.
-2. Canadians drink almost 10 billion cups of tea a year.
-3. Tea industry claims that tea is safe for Canadians to drink.
-
-### Opinionated Statements:
-1. "This is very worrisome from a number of perspectives," environmental lawyer David Boyd.
-2. "I think that’s a complete abdication of CFIA's responsibility to protect Canadian people," David Boyd.
-3. "The whole point of pesticides is that they’re chemically and biologically active in parts per million or parts per billion," David Boyd.
-4. "If you drink tea, regular tea, I don't care it's what brand is that, the fact of life, this agricultural product does have pesticides," James O’Young.
-
-### Findings Summary:
-The non-factual and opinionated sections in the article might mislead readers by creating a perception that all tea brands are unsafe due to pesticide residues, overlooking the safety measures taken by some companies. The opinions expressed by David Boyd could instill fear without considering the regulatory standards in place. The industry's claim of tea safety without acknowledging the presence of pesticides may downplay the issue. It's essential to consider both sides and understand the regulatory framework to make informed decisions.
-
-### Sources:
-1. [Our Better Health - Pesticide traces in some tea exceed allowable limits](https://ourbetterhealth.org/2014/03/11/pesticide-traces-in-some-tea-exceed-allowable-limits/)
-2. [PubMed - The bitter side of teas: Pesticide residues and their impact on human health](https://pubmed.ncbi.nlm.nih.gov/37482194/)
+{
+    "article": "Canadians drink almost 10 billion cups of tea a year, but what else is steeping in those cups? Testing by CBC Marketplace and CBC\u2019s French investigative consumer show L\u2019Epicerie reveals that some teas on the market contain levels of pesticides that exceed Canadian standards.\n\nTea is the world\u2019s most popular beverage, often touted for its healthful properties. Canadians 16 and older drink 83 litres per person every year, a number that has been increasing.\n\nCBC tested black and green teas including Canada\u2019s most popular brands: Lipton, Red Rose, Tetley and Twinings. Other popular brands tested included No Name, Uncle Lee\u2019s Legends of China, King Cole and Signal. Full test results can be found here.\n\nUsing an accredited lab, CBC used the testing method employed by the Canadian Food Inspection Agency (CFIA) to test pesticide residues in dry tea leaves.\n\nMarketplace investigation Watch Marketplace's episode, Strange Brew, at cbc.ca/marketplace.\n\nHalf of the teas tested contained pesticide residues above the allowable limits in Canada. And eight of the 10 brands tested contained multiple chemicals, with one brand containing residues of 22 different pesticides.\n\nSome of the pesticides found \u2014 including endosulfan and monocrotophos \u2014 are in the process of being banned from use in some countries because of dangers to the environment and to workers.\n\nOf the 10 brands tested, only Red Rose came back free of pesticide residues.\n\n\"This is very worrisome from a number of perspectives,\" environmental lawyer David Boyd, told Marketplace in an interview.\n\n\"The presence of so many pesticides on a single product and so many products that exceed the maximum residue limits for pesticides, suggests that we're seeing very poor agricultural practices in countries, which poses risk to the environment where these products are being grown; which pose risk to the farm workers who are growing these crops, and ultimately pose risk to the Canadians who are consuming these products.\"\n\nHealth effects questioned\n\nThe CFIA is responsible for monitoring pesticide levels in the food we buy. CFIA tests of tea from 2009 and 2011 found that many of the brands the agency tested had levels of pesticide residue that exceed allowed levels.\n\nCanadians drink almost 10 billion cups of tea every year. CBC tested popular brands for pesticides; half of the teas tested contained pesticide residues above the allowable limits. (CBC)\n\nA CFIA study published in the Journal of Agricultural and Food Chemistry this past January found that pesticide residues in dry tea leaves do make their way into brewed tea. \"The pesticide residues were likely transferred from tea leaves to brewed tea during the brewing process, and may therefore pose a risk to consumers,\" the paper concludes.\n\nCBC retested some brands that had failed past CFIA testing, and found that the problem continues.\n\nCFIA declined to speak with the CBC in an interview. However, in a statement, the agency says that while many teas failed to meet levels set by the government, the agency sees no cause for alarm, even for teas that exceed the limits.\n\n\"Health Canada reviewed the information provided by Marketplace and for the pesticides bifenthrin, imidacloprid, acetamiprid, chlorfenapyr, pyridaben, acephate, dicofol and monocrotophos determined that consumption of tea containing the residues listed does not pose a health risk based on the level of residues reported, expected frequency of exposure and contribution to overall diet. Moreover, a person would have to consume approximately 75 cups of tea per day over their entire lifetime to elicit an adverse health effect,\" a spokesperson wrote to the CBC in a statement.\n\nBut Boyd says the government should be alarmed by the results. \"I think that\u2019s a complete abdication of CFIA's responsibility to protect Canadian people. The reality is that there is emerging science about the impacts of pesticides at very low concentrations,\" he says.\n\n\"The whole point of pesticides is that they\u2019re chemically and biologically active in parts per million or parts per billion,\u201d Boyd says. \u201cPesticides can have adverse effects at what are seemingly very small concentrations.\u201d\n\nAccording to Boyd, these results \"should raise a red flag for the regulators whose job is to protect the health and safety of Canadians in our environment.\"\n\nTea industry responds\n\nDespite the tests, the Tea Association of Canada says that tea is safe for Canadians to drink.\n\nIn an interview with Marketplace, James O\u2019Young, vice president of Uncle Lee\u2019s Legends of China \u2014 whose green tea had the highest number of pesticides in the brands tested \u2014 said that pesticides are a reality of the tea industry. \"If you drink tea, regular tea, I don't care it's what brand is that, the fact of life, this agricultural product does have pesticides,\" he says.\n\nTATA Global Beverages, which owns Tetley, and Unilever, which owns Red Rose and Lipton, both stand behind the safety of their products.\n\n\"Consumer safety is very important to us. Upon receiving your communication, we proactively retrieved the test results from the independent laboratory that tested the raw tea used in this batch code which confirmed that our tea complies with all Canadian food safety regulations and is of high quality,\" TATA Global Beverages wrote in a statement.\n\n\"Unilever is fully confident in the safety of our teas,\" the company wrote in a statement.\n\nBoyd says that the best way to avoid pesticides is to support organic producers. \"If you like drinking tea, you can drink organic tea, which is less likely to be contaminated by pesticides,\" he says.\n\nBut even then, CFIA testing has found the presence of pesticide residues on organic tea leaves.",
+    "article_summary": "Canadians consume nearly 10 billion cups of tea annually, with some teas found to contain pesticide residues exceeding Canadian standards. Testing by CBC Marketplace revealed that half of the teas tested had pesticide levels above allowable limits. The presence of multiple pesticides in some brands raised concerns about agricultural practices and risks to consumers. While industry representatives defend the safety of their products, environmental lawyer David Boyd criticized the regulatory response and advocated for supporting organic tea producers to avoid pesticides.",
+    "author": "Megan Griffith-Greene",
+    "author_publisher_explanation": "The source has no previous history of publishing misinformation! Megan Griffith-Greene is known for her role as the service journalism editor at The Washington Post. CBC/Radio-Canada is a reputable organization known for its wide range of news coverage and storytelling.",
+    "author_trustability": "Somewhat-Reliable",
+    "bias": "Moderate",
+    "bias_explanation": "The article exhibits a moderate bias by presenting the viewpoints of environmental advocates like David Boyd alongside statements from the tea industry representatives. It leans towards highlighting the risks associated with pesticides in teas.",
+    "content_analysis": "The article presents well-supported factual information about the presence of pesticides in teas, backed by testing results and statements from regulatory agencies. The opinions expressed by David Boyd add a critical perspective on the issue, urging for more stringent actions to protect consumers.",
+    "content_analysis_biblio": [
+        "https://madeinca.ca/tea-consumption-statistics-canada/",
+        "https://ourbetterhealth.org/2014/03/11/pesticide-traces-in-some-tea-exceed-allowable-limits/"
+    ],
+    "facts_dict": [
+        "Canadians drink almost 10 billion cups of tea a year.",
+        "Tea is the world\u2019s most popular beverage.",
+        "Canadians 16 and older drink 83 litres of tea per person every year.",
+        "CBC Marketplace and CBC\u2019s French investigative consumer show L\u2019Epicerie conducted testing on teas that revealed some contain levels of pesticides exceeding Canadian standards.",
+        "Half of the teas tested contained pesticide residues above the allowable limits in Canada.",
+        "CBC used an accredited lab and the testing method employed by the Canadian Food Inspection Agency (CFIA) to test pesticide residues in dry tea leaves.",
+        "CFIA tests of tea from 2009 and 2011 found that many brands had levels of pesticide residue exceeding allowed levels.",
+        "A CFIA study published in the Journal of Agricultural and Food Chemistry found that pesticide residues in dry tea leaves make their way into brewed tea.",
+        "Some pesticides found in teas are in the process of being banned in some countries due to environmental and worker safety concerns.",
+        "Red Rose was the only brand tested that came back free of pesticide residues.",
+        "Health Canada stated that consumption of tea containing certain pesticide residues does not pose a health risk based on the level of residues reported.",
+        "Tea industry representatives, including TATA Global Beverages and Unilever, stand behind the safety of their products.",
+        "The Tea Association of Canada asserts that tea is safe for Canadians to drink.",
+        "CFIA testing found the presence of pesticide residues on organic tea leaves."
+    ],
+    "input_article": "Canadians drink almost 10 billion cups of tea a year, but what else is steeping in those cups? Testing by CBC Marketplace and CBC\u2019s French investigative consumer show L\u2019Epicerie reveals that some teas on the market contain levels of pesticides that exceed Canadian standards.\n\nTea is the world\u2019s most popular beverage, often touted for its healthful properties. Canadians 16 and older drink 83 litres per person every year, a number that has been increasing.\n\nCBC tested black and green teas including Canada\u2019s most popular brands: Lipton, Red Rose, Tetley and Twinings. Other popular brands tested included No Name, Uncle Lee\u2019s Legends of China, King Cole and Signal. Full test results can be found here.\n\nUsing an accredited lab, CBC used the testing method employed by the Canadian Food Inspection Agency (CFIA) to test pesticide residues in dry tea leaves.\n\nMarketplace investigation Watch Marketplace's episode, Strange Brew, at cbc.ca/marketplace.\n\nHalf of the teas tested contained pesticide residues above the allowable limits in Canada. And eight of the 10 brands tested contained multiple chemicals, with one brand containing residues of 22 different pesticides.\n\nSome of the pesticides found \u2014 including endosulfan and monocrotophos \u2014 are in the process of being banned from use in some countries because of dangers to the environment and to workers.\n\nOf the 10 brands tested, only Red Rose came back free of pesticide residues.\n\n\"This is very worrisome from a number of perspectives,\" environmental lawyer David Boyd, told Marketplace in an interview.\n\n\"The presence of so many pesticides on a single product and so many products that exceed the maximum residue limits for pesticides, suggests that we're seeing very poor agricultural practices in countries, which poses risk to the environment where these products are being grown; which pose risk to the farm workers who are growing these crops, and ultimately pose risk to the Canadians who are consuming these products.\"\n\nHealth effects questioned\n\nThe CFIA is responsible for monitoring pesticide levels in the food we buy. CFIA tests of tea from 2009 and 2011 found that many of the brands the agency tested had levels of pesticide residue that exceed allowed levels.\n\nCanadians drink almost 10 billion cups of tea every year. CBC tested popular brands for pesticides; half of the teas tested contained pesticide residues above the allowable limits. (CBC)\n\nA CFIA study published in the Journal of Agricultural and Food Chemistry this past January found that pesticide residues in dry tea leaves do make their way into brewed tea. \"The pesticide residues were likely transferred from tea leaves to brewed tea during the brewing process, and may therefore pose a risk to consumers,\" the paper concludes.\n\nCBC retested some brands that had failed past CFIA testing, and found that the problem continues.\n\nCFIA declined to speak with the CBC in an interview. However, in a statement, the agency says that while many teas failed to meet levels set by the government, the agency sees no cause for alarm, even for teas that exceed the limits.\n\n\"Health Canada reviewed the information provided by Marketplace and for the pesticides bifenthrin, imidacloprid, acetamiprid, chlorfenapyr, pyridaben, acephate, dicofol and monocrotophos determined that consumption of tea containing the residues listed does not pose a health risk based on the level of residues reported, expected frequency of exposure and contribution to overall diet. Moreover, a person would have to consume approximately 75 cups of tea per day over their entire lifetime to elicit an adverse health effect,\" a spokesperson wrote to the CBC in a statement.\n\nBut Boyd says the government should be alarmed by the results. \"I think that\u2019s a complete abdication of CFIA's responsibility to protect Canadian people. The reality is that there is emerging science about the impacts of pesticides at very low concentrations,\" he says.\n\n\"The whole point of pesticides is that they\u2019re chemically and biologically active in parts per million or parts per billion,\u201d Boyd says. \u201cPesticides can have adverse effects at what are seemingly very small concentrations.\u201d\n\nAccording to Boyd, these results \"should raise a red flag for the regulators whose job is to protect the health and safety of Canadians in our environment.\"\n\nTea industry responds\n\nDespite the tests, the Tea Association of Canada says that tea is safe for Canadians to drink.\n\nIn an interview with Marketplace, James O\u2019Young, vice president of Uncle Lee\u2019s Legends of China \u2014 whose green tea had the highest number of pesticides in the brands tested \u2014 said that pesticides are a reality of the tea industry. \"If you drink tea, regular tea, I don't care it's what brand is that, the fact of life, this agricultural product does have pesticides,\" he says.\n\nTATA Global Beverages, which owns Tetley, and Unilever, which owns Red Rose and Lipton, both stand behind the safety of their products.\n\n\"Consumer safety is very important to us. Upon receiving your communication, we proactively retrieved the test results from the independent laboratory that tested the raw tea used in this batch code which confirmed that our tea complies with all Canadian food safety regulations and is of high quality,\" TATA Global Beverages wrote in a statement.\n\n\"Unilever is fully confident in the safety of our teas,\" the company wrote in a statement.\n\nBoyd says that the best way to avoid pesticides is to support organic producers. \"If you like drinking tea, you can drink organic tea, which is less likely to be contaminated by pesticides,\" he says.\n\nBut even then, CFIA testing has found the presence of pesticide residues on organic tea leaves.",
+    "input_author": "Megan Griffith-Greene",
+    "input_publisher": "cbc.ca",
+    "non_facts_dict": [],
+    "opinions_dict": [
+        "David Boyd, an environmental lawyer, expressed concern about the poor agricultural practices and risks associated with pesticides in teas.",
+        "Boyd criticized CFIA for not taking sufficient action to protect Canadians from the risks of pesticides in teas.",
+        "Boyd suggested supporting organic tea producers as a way to avoid pesticides."
+    ],
+    "publish_date": null,
+    "publisher": "cbc.ca",
+    "publisher_trustability": "Somewhat-Reliable",
+    "recommendation": "The article demonstrates moderate credibility. It contains a high number of factual statements (14 facts) compared to non-facts and opinions (3), which supports its claims well. The critical tone is consistent with the article's focus on the risks of pesticides in teas, and the moderate bias is evident in the balanced presentation of viewpoints from both environmental advocates and industry representatives. However, the somewhat-reliable trustability of both the author and publisher suggests a need for cautious interpretation. Social media sentiment, particularly from Reddit, reflects public concern and skepticism, which aligns with the article's critical stance but also indicates potential bias in public perception. Overall, while the article is informative and well-supported, the moderate bias and somewhat-reliable sources slightly diminish its credibility.",
+    "recommendation_score": 70,
+    "reddit_comments_sentiment": "Positive",
+    "reddit_posts": [
+        {
+            "score": 39,
+            "sentiment": {
+                "average_score": -0.630809485912323,
+                "negative": 4,
+                "neutral": 0,
+                "positive": 1
+            },
+            "title": "Are you concerned about pesticides in tea leaves?",
+            "url": "https://reddit.com/r/tea/comments/1axuhmg/are_you_concerned_about_pesticides_in_tea_leaves/"
+        },
+        {
+            "score": 0,
+            "sentiment": {
+                "average_score": -0.5927938938140869,
+                "negative": 4,
+                "neutral": 0,
+                "positive": 1
+            },
+            "title": "Genuine Question, is tea from China safe? Does it have pesticide residue, heavy metals, etc.?",
+            "url": "https://reddit.com/r/tea/comments/1aufgi3/genuine_question_is_tea_from_china_safe_does_it/"
+        }
+    ],
+    "reddit_sentiment_summary": "The Reddit posts express concerns about the safety of tea, particularly regarding pesticide residues and heavy metals. Both posts have negative sentiment values, indicating apprehension and skepticism about the potential health risks associated with consuming tea, especially from China. Users are questioning the safety and quality of tea leaves.",
+    "reddit_sentiment_value": 73,
+    "social_media_analysis": {},
+    "source_analysis": {},
+    "source_analysis_biblio": [
+        "https://www.washingtonpost.com/people/megan-griffith-greene/",
+        "https://www.cbc.ca/"
+    ],
+    "supported_claims": "Well-Supported",
+    "title": "Pesticide Traces In Some Tea Exceed Allowable Limits",
+    "tone": "Critical",
+    "tone_explanation": "The article takes a critical stance towards the presence of pesticides in teas, highlighting concerns about environmental risks, worker safety, and potential health hazards for consumers."
+}
