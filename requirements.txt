@@ -15,3 +15,5 @@ flask-cors
 validators
 newspaper3k
 lxml-html-clean
+supabase
+google-cloud-firestore

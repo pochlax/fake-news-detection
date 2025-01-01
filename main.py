@@ -2,6 +2,8 @@ import argparse
 import json
 import os
 import validators
+import uuid
+import copy
 
 from dotenv import load_dotenv
 from src import utils as ut
@@ -12,6 +14,9 @@ from src.agents import NewsAnalysisOrchestrator
 from newspaper import Article
 from urllib.parse import urlparse
 from flask_cors import CORS
+from datetime import datetime
+from supabase import create_client, Client
+from google.cloud import firestore
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -77,7 +82,30 @@ def analyze_article():
 
         result.update(article_info)
 
-        # result = article_info
+        if 'recommendation_score' in result:
+            # After analysis is complete and you have the result:
+            analysis_result = copy.deepcopy(result)
+            analysis_result['article_id'] = str(uuid.uuid4())
+
+            # Save to Supabase user_history
+            user_history_data = {
+                'id': str(uuid.uuid4()),
+                # 'user_id': request.headers.get('user_id'),  # Assuming user_id is passed in headers
+                'user_id': str(uuid.uuid4()),
+                # 'article_id': 123,
+                # 'article_title': "Pesticides in Tea",
+                # 'recommendation': 70,
+                'article_id': analysis_result['article_id'],
+                'article_title': analysis_result['title'],
+                'recommendation': analysis_result['recommendation_score'],
+                'article_url': url
+            }
+            
+            supabase.table('user_history').insert(user_history_data).execute()
+        
+        # # Save to Firestore articles collection
+        # doc_ref = db.collection('articles').document(analysis_result['article_id'])
+        # doc_ref.set(analysis_result)
         
         return jsonify(result), 200
 
@@ -91,6 +119,38 @@ def analyze_article():
             "error": str(e),
             "status": "failed"
         }), 500
+
+# Initialize Supabase and Firestore clients
+supabase: Client = create_client(os.getenv('NEXT_PUBLIC_SUPABASE_URL'), os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY'))
+# db = firestore.Client()
+
+@app.route('/fetchHistory/<user_id>', methods=['GET'])
+def fetch_history(user_id):
+    try:
+        # Query the user_history table from Supabase
+        response = supabase.table('user_history') \
+            .select('*') \
+            .eq('user_id', user_id) \
+            .order('created_at', desc=True) \
+            .execute()
+        
+        return jsonify(response.data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/fetchArticle/<article_id>', methods=['GET'])
+def fetch_article(article_id):
+    try:
+        # Get article from Firestore
+        # doc_ref = db.collection('articles').document(str(article_id))
+        # doc = doc_ref.get()
+        
+        if doc.exists:
+            return jsonify(doc.to_dict()), 200
+        else:
+            return jsonify({'error': 'Article not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Error handlers
 @app.errorhandler(404)
