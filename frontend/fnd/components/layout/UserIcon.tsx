@@ -1,3 +1,6 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,25 +13,56 @@ import {
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Settings, LogOut, User, CreditCard } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export function UserIcon() {
+    const router = useRouter()
+    const [userName, setUserName] = useState<string>('')
+    const [userEmail, setUserEmail] = useState<string>('')
+    const [userPicture, setUserPicture] = useState<string>('')
+
+    useEffect(() => {
+        // Get user info from localStorage
+        const storedName = localStorage.getItem('userName') || ''
+        const storedEmail = localStorage.getItem('userEmail') || ''
+        const storedPicture = localStorage.getItem('userPicture') || ''
+
+        setUserName(storedName)
+        setUserEmail(storedEmail)
+        setUserPicture(storedPicture)
+    }, [])
+
+    const handleSignOut = () => {
+        // Clear localStorage
+        localStorage.clear()
+        // Redirect to landing page
+        router.push('/')
+    }
+
+    // Get initials for avatar fallback
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                        <AvatarImage src="/avatars/01.png" alt="User avatar" />
-                        <AvatarFallback>JD</AvatarFallback>
+                    <Avatar>
+                        <AvatarImage src={userPicture} alt={userName} />
+                        <AvatarFallback>{getInitials(userName)}</AvatarFallback>
                     </Avatar>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
+            <DropdownMenuContent align="end">
+                <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">John Doe</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                            john.doe@example.com
-                        </p>
+                        <p className="text-sm font-medium leading-none">{userName}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{userEmail}</p>
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -47,9 +81,9 @@ export function UserIcon() {
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    Sign out
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
