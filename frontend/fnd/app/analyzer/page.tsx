@@ -14,8 +14,20 @@ import { Progress } from "@/components/ui/progress"
 import { UserIcon } from "@/components/layout/UserIcon"
 import { CollapsibleSidebar } from "@/components/layout/CollapsibleSidebar"
 import { useRouter } from 'next/navigation'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+
 
 export default function ArticleAnalyzer() {
+    const router = useRouter()
+
+    // useEffect(() => {
+    //     // Check if user is authenticated
+    //     const userId = localStorage.getItem('userId')
+    //     if (!userId) {
+    //         router.push('/')
+    //     }
+    // }, [router])
+
     const [inputUrl, setInputUrl] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [articleTitle, setArticleTitle] = useState('Article Content');
@@ -42,7 +54,6 @@ export default function ArticleAnalyzer() {
     const [recommendationScore, setRecommendationScore] = useState<number>(0);
     const [isOpen, setIsOpen] = useState(false)
 
-    const router = useRouter()
 
     const handleLandingPage = () => {
         router.push('/')
@@ -238,300 +249,302 @@ export default function ArticleAnalyzer() {
     };
 
     return (
-        <main className="pb-1">
-            <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
-                <CollapsibleSidebar isOpen={isOpen} setIsOpen={setIsOpen} />
+        <ProtectedRoute>
+            <main className="pb-1">
+                <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
+                    <CollapsibleSidebar isOpen={isOpen} setIsOpen={setIsOpen} />
 
-                <div className={`flex flex-col flex-grow transition-all duration-300 ${isOpen ? 'ml-60' : 'ml-0'}`}>
-                    <header className="border-b bg-white dark:bg-gray-800 px-4 py-3">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                {!isOpen && (
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="hover:bg-accent"
-                                        onClick={() => setIsOpen(!isOpen)}
-                                    >
-                                        <Menu className="h-5 w-5" />
+                    <div className={`flex flex-col flex-grow transition-all duration-300 ${isOpen ? 'ml-60' : 'ml-0'}`}>
+                        <header className="border-b bg-white dark:bg-gray-800 px-4 py-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    {!isOpen && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="hover:bg-accent"
+                                            onClick={() => setIsOpen(!isOpen)}
+                                        >
+                                            <Menu className="h-5 w-5" />
+                                        </Button>
+                                    )}
+                                    <div className="flex items-center gap-2" onClick={handleLandingPage}>
+                                        <Shield className="h-5 w-5" />
+                                        <h1 className="text-lg font-semibold">de(fnd)</h1>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <Button variant="ghost">
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Download Report
                                     </Button>
-                                )}
-                                <div className="flex items-center gap-2" onClick={handleLandingPage}>
-                                    <Shield className="h-5 w-5" />
-                                    <h1 className="text-lg font-semibold">de(fnd)</h1>
+                                    <Button>Analyze New Article</Button>
+                                    <UserIcon />
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <Button variant="ghost">
-                                    <Download className="mr-2 h-4 w-4" />
-                                    Download Report
-                                </Button>
-                                <Button>Analyze New Article</Button>
-                                <UserIcon />
-                            </div>
-                        </div>
-                    </header>
+                        </header>
 
-                    {!articleContent ? (
-                        // Welcome screen with centered input
-                        <div className="flex-grow flex flex-col items-center justify-center p-6">
-                            <h1 className="text-2xl font-semibold mb-8">What can I help you analyze?</h1>
-                            <div className="w-full max-w-xl">
-                                <Card className="shadow-lg">
-                                    <CardContent className="p-3">
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="url"
-                                                value={inputUrl}
-                                                onChange={(e) => setInputUrl(e.target.value)}
-                                                disabled={isAnalyzing}
-                                                placeholder="Enter article URL to analyze..."
-                                                className="flex-1 px-3 py-2 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                                aria-label="Article URL input"
-                                            />
-                                            <Button
-                                                size="sm"
-                                                onClick={handleAnalyze}
-                                                disabled={isAnalyzing || !inputUrl}
-                                            >
-                                                {isAnalyzing ? 'Analyzing...' : 'Analyze'}
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex-grow grid md:grid-cols-[1fr_300px]">
-                            {/* Main Content - Article Text */}
-                            <main className="p-6">
-                                <Card className="col-span-1">
-                                    <CardHeader>
-                                        <CardTitle>{articleTitle}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="prose max-w-none dark:prose-invert">
-                                        {error && (
-                                            <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
-                                                {error}
+                        {!articleContent ? (
+                            // Welcome screen with centered input
+                            <div className="flex-grow flex flex-col items-center justify-center p-6">
+                                <h1 className="text-2xl font-semibold mb-8">What can I help you analyze?</h1>
+                                <div className="w-full max-w-xl">
+                                    <Card className="shadow-lg">
+                                        <CardContent className="p-3">
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="url"
+                                                    value={inputUrl}
+                                                    onChange={(e) => setInputUrl(e.target.value)}
+                                                    disabled={isAnalyzing}
+                                                    placeholder="Enter article URL to analyze..."
+                                                    className="flex-1 px-3 py-2 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                                    aria-label="Article URL input"
+                                                />
+                                                <Button
+                                                    size="sm"
+                                                    onClick={handleAnalyze}
+                                                    disabled={isAnalyzing || !inputUrl}
+                                                >
+                                                    {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+                                                </Button>
                                             </div>
-                                        )}
-                                        {isAnalyzing ? (
-                                            <div className="text-center py-4">
-                                                <p>Analyzing article...</p>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                {formatArticleText(articleContent || '')}
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            </main>
-
-                            {/* Right Sidebar - Analysis */}
-                            <aside className="border-l bg-background p-6">
-                                <div className="space-y-6">
-                                    {/* Credibility Score Card */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Credibility Score</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="grid gap-4">
-                                            <div className="text-center">
-                                                {articleContent ? (
-                                                    <>
-                                                        <span className={`text-6xl font-bold ${getScoreColor(recommendationScore).replace('bg-', 'text-')}`}>
-                                                            {recommendationScore}%
-                                                        </span>
-                                                        <Progress
-                                                            value={recommendationScore}
-                                                            className={`mt-2 [&>div]:${getProgressBarColor(recommendationScore)}`}
-                                                        />
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <span className="text-6xl font-bold text-gray-400">?</span>
-                                                        <Progress
-                                                            value={0}
-                                                            className="mt-2 [&>div]:bg-gray-400"
-                                                        />
-                                                    </>
-                                                )}
-                                            </div>
-                                            <p className="text-sm text-muted-foreground">
-                                                Tip: Scores above 80% typically indicate reliable content with verifiable sources and balanced
-                                                reporting.
-                                            </p>
                                         </CardContent>
                                     </Card>
-
-                                    {/* Analysis Categories Card */}
-                                    <Card>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex-grow grid md:grid-cols-[1fr_300px]">
+                                {/* Main Content - Article Text */}
+                                <main className="p-6">
+                                    <Card className="col-span-1">
                                         <CardHeader>
-                                            <CardTitle>Analysis Categories</CardTitle>
+                                            <CardTitle>{articleTitle}</CardTitle>
                                         </CardHeader>
-                                        <CardContent>
-                                            <Accordion type="single" collapsible className="w-full">
-                                                <AccordionItem value="content">
-                                                    <AccordionTrigger>
-                                                        <div className="flex items-center gap-2">
-                                                            Content Analysis
-                                                            {articleContent && ( // Only show score if article content exists
-                                                                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(calculateContentScore())}`}>
-                                                                    {calculateContentScore()}%
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </AccordionTrigger>
-                                                    <AccordionContent>
-                                                        <div className="grid gap-2 text-sm">
-                                                            <div className="flex justify-between">
-                                                                <span>Tone</span>
-                                                                <span className={`font-medium ${getAnalysisColor('tone', tone)}`}>
-                                                                    {tone || 'Analyzing...'}
-                                                                </span>
-                                                            </div>
-                                                            {toneExplanation && (
-                                                                <div className="mt-1 text-xs text-gray-600">
-                                                                    {toneExplanation}
-                                                                </div>
-                                                            )}
-                                                            <div className="flex justify-between">
-                                                                <span>Bias</span>
-                                                                <span className={`font-medium ${getAnalysisColor('bias', bias)}`}>
-                                                                    {bias || 'Analyzing...'}
-                                                                </span>
-                                                            </div>
-                                                            {biasExplanation && (
-                                                                <div className="mt-1 text-xs text-gray-600">
-                                                                    {biasExplanation}
-                                                                </div>
-                                                            )}
-                                                            <div className="flex justify-between">
-                                                                <span>Claims</span>
-                                                                <span className={`font-medium ${getAnalysisColor('supportedClaims', supportedClaims)}`}>
-                                                                    {supportedClaims || 'Analyzing...'}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </AccordionContent>
-                                                </AccordionItem>
+                                        <CardContent className="prose max-w-none dark:prose-invert">
+                                            {error && (
+                                                <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
+                                                    {error}
+                                                </div>
+                                            )}
+                                            {isAnalyzing ? (
+                                                <div className="text-center py-4">
+                                                    <p>Analyzing article...</p>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    {formatArticleText(articleContent || '')}
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </main>
 
-                                                <AccordionItem value="source">
-                                                    <AccordionTrigger>
-                                                        <div className="flex items-center gap-2">
-                                                            Source Credibility
-                                                            {articleContent && ( // Only show score if article content exists
-                                                                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(calculateSourceScore())}`}>
-                                                                    {calculateSourceScore()}%
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </AccordionTrigger>
-                                                    <AccordionContent>
-                                                        <div className="grid gap-2 text-sm">
-                                                            <div className="flex justify-between">
-                                                                <span>Author Trustability</span>
-                                                                <span className={`font-medium ${getAnalysisColor('authorTrustability', authorTrustability)}`}>
-                                                                    {authorTrustability || 'Analyzing...'}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex justify-between">
-                                                                <span>Publisher Reputation</span>
-                                                                <span className={`font-medium ${getAnalysisColor('publisherTrustability', publisherTrustability)}`}>
-                                                                    {publisherTrustability || 'Analyzing...'}
-                                                                </span>
-                                                            </div>
-                                                            {authorPublisherExplanation && (
-                                                                <div className="mt-1 text-xs text-gray-600">
-                                                                    {authorPublisherExplanation}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </AccordionContent>
-                                                </AccordionItem>
+                                {/* Right Sidebar - Analysis */}
+                                <aside className="border-l bg-background p-6">
+                                    <div className="space-y-6">
+                                        {/* Credibility Score Card */}
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle>Credibility Score</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="grid gap-4">
+                                                <div className="text-center">
+                                                    {articleContent ? (
+                                                        <>
+                                                            <span className={`text-6xl font-bold ${getScoreColor(recommendationScore).replace('bg-', 'text-')}`}>
+                                                                {recommendationScore}%
+                                                            </span>
+                                                            <Progress
+                                                                value={recommendationScore}
+                                                                className={`mt-2 [&>div]:${getProgressBarColor(recommendationScore)}`}
+                                                            />
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <span className="text-6xl font-bold text-gray-400">?</span>
+                                                            <Progress
+                                                                value={0}
+                                                                className="mt-2 [&>div]:bg-gray-400"
+                                                            />
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Tip: Scores above 80% typically indicate reliable content with verifiable sources and balanced
+                                                    reporting.
+                                                </p>
+                                            </CardContent>
+                                        </Card>
 
-                                                <AccordionItem value="social">
-                                                    <AccordionTrigger>
-                                                        <div className="flex items-center gap-2">
-                                                            Social Analysis
-                                                            {articleContent && ( // Only show score if article content exists
-                                                                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(socialScore)}`}>
-                                                                    {socialScore}%
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </AccordionTrigger>
-                                                    <AccordionContent>
-                                                        <div className="grid gap-2 text-sm">
-                                                            <div className="flex justify-between">
-                                                                <span>Social Sentiment (Reddit)</span>
-                                                                <span className={`font-medium ${getAnalysisColor('socialSentiment', socialSentiment)}`}>
-                                                                    {socialSentiment || 'Analyzing...'}
-                                                                </span>
+                                        {/* Analysis Categories Card */}
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle>Analysis Categories</CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <Accordion type="single" collapsible className="w-full">
+                                                    <AccordionItem value="content">
+                                                        <AccordionTrigger>
+                                                            <div className="flex items-center gap-2">
+                                                                Content Analysis
+                                                                {articleContent && ( // Only show score if article content exists
+                                                                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(calculateContentScore())}`}>
+                                                                        {calculateContentScore()}%
+                                                                    </span>
+                                                                )}
                                                             </div>
-                                                            {socialSentimentExplanation && (
-                                                                <div className="mt-1 text-xs text-gray-600">
-                                                                    {socialSentimentExplanation}
+                                                        </AccordionTrigger>
+                                                        <AccordionContent>
+                                                            <div className="grid gap-2 text-sm">
+                                                                <div className="flex justify-between">
+                                                                    <span>Tone</span>
+                                                                    <span className={`font-medium ${getAnalysisColor('tone', tone)}`}>
+                                                                        {tone || 'Analyzing...'}
+                                                                    </span>
                                                                 </div>
-                                                            )}
-                                                            {/* <div className="flex justify-between">
+                                                                {toneExplanation && (
+                                                                    <div className="mt-1 text-xs text-gray-600">
+                                                                        {toneExplanation}
+                                                                    </div>
+                                                                )}
+                                                                <div className="flex justify-between">
+                                                                    <span>Bias</span>
+                                                                    <span className={`font-medium ${getAnalysisColor('bias', bias)}`}>
+                                                                        {bias || 'Analyzing...'}
+                                                                    </span>
+                                                                </div>
+                                                                {biasExplanation && (
+                                                                    <div className="mt-1 text-xs text-gray-600">
+                                                                        {biasExplanation}
+                                                                    </div>
+                                                                )}
+                                                                <div className="flex justify-between">
+                                                                    <span>Claims</span>
+                                                                    <span className={`font-medium ${getAnalysisColor('supportedClaims', supportedClaims)}`}>
+                                                                        {supportedClaims || 'Analyzing...'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </AccordionContent>
+                                                    </AccordionItem>
+
+                                                    <AccordionItem value="source">
+                                                        <AccordionTrigger>
+                                                            <div className="flex items-center gap-2">
+                                                                Source Credibility
+                                                                {articleContent && ( // Only show score if article content exists
+                                                                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(calculateSourceScore())}`}>
+                                                                        {calculateSourceScore()}%
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </AccordionTrigger>
+                                                        <AccordionContent>
+                                                            <div className="grid gap-2 text-sm">
+                                                                <div className="flex justify-between">
+                                                                    <span>Author Trustability</span>
+                                                                    <span className={`font-medium ${getAnalysisColor('authorTrustability', authorTrustability)}`}>
+                                                                        {authorTrustability || 'Analyzing...'}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex justify-between">
+                                                                    <span>Publisher Reputation</span>
+                                                                    <span className={`font-medium ${getAnalysisColor('publisherTrustability', publisherTrustability)}`}>
+                                                                        {publisherTrustability || 'Analyzing...'}
+                                                                    </span>
+                                                                </div>
+                                                                {authorPublisherExplanation && (
+                                                                    <div className="mt-1 text-xs text-gray-600">
+                                                                        {authorPublisherExplanation}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </AccordionContent>
+                                                    </AccordionItem>
+
+                                                    <AccordionItem value="social">
+                                                        <AccordionTrigger>
+                                                            <div className="flex items-center gap-2">
+                                                                Social Analysis
+                                                                {articleContent && ( // Only show score if article content exists
+                                                                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(socialScore)}`}>
+                                                                        {socialScore}%
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </AccordionTrigger>
+                                                        <AccordionContent>
+                                                            <div className="grid gap-2 text-sm">
+                                                                <div className="flex justify-between">
+                                                                    <span>Social Sentiment (Reddit)</span>
+                                                                    <span className={`font-medium ${getAnalysisColor('socialSentiment', socialSentiment)}`}>
+                                                                        {socialSentiment || 'Analyzing...'}
+                                                                    </span>
+                                                                </div>
+                                                                {socialSentimentExplanation && (
+                                                                    <div className="mt-1 text-xs text-gray-600">
+                                                                        {socialSentimentExplanation}
+                                                                    </div>
+                                                                )}
+                                                                {/* <div className="flex justify-between">
                                                                 <span>Share Pattern</span>
                                                                 <span className="font-medium text-green-600">Organic</span>
                                                             </div> */}
-                                                        </div>
-                                                    </AccordionContent>
-                                                </AccordionItem>
-                                            </Accordion>
-                                        </CardContent>
-                                    </Card>
+                                                            </div>
+                                                        </AccordionContent>
+                                                    </AccordionItem>
+                                                </Accordion>
+                                            </CardContent>
+                                        </Card>
 
-                                    {/* Analysis Notes Card */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Analysis Report</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="text-sm text-muted-foreground">
-                                            <p>
-                                                {recommendation}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            </aside>
+                                        {/* Analysis Notes Card */}
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle>Analysis Report</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="text-sm text-muted-foreground">
+                                                <p>
+                                                    {recommendation}
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                </aside>
+                            </div>
+                        )}
+
+                    </div>
+
+                    {articleContent && (
+                        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+                            <Card className="w-[400px] shadow-lg">
+                                <CardContent className="p-3">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="url"
+                                            value={inputUrl}
+                                            onChange={(e) => setInputUrl(e.target.value)}
+                                            disabled={isAnalyzing}
+                                            placeholder="Enter article URL to analyze..."
+                                            className="flex-1 px-3 py-2 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                            aria-label="Article URL input"
+                                        />
+                                        <Button
+                                            size="sm"
+                                            onClick={handleAnalyze}
+                                            disabled={isAnalyzing || !inputUrl}
+                                        >
+                                            {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
                     )}
-
                 </div>
-
-                {articleContent && (
-                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-                        <Card className="w-[400px] shadow-lg">
-                            <CardContent className="p-3">
-                                <div className="flex gap-2">
-                                    <input
-                                        type="url"
-                                        value={inputUrl}
-                                        onChange={(e) => setInputUrl(e.target.value)}
-                                        disabled={isAnalyzing}
-                                        placeholder="Enter article URL to analyze..."
-                                        className="flex-1 px-3 py-2 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                        aria-label="Article URL input"
-                                    />
-                                    <Button
-                                        size="sm"
-                                        onClick={handleAnalyze}
-                                        disabled={isAnalyzing || !inputUrl}
-                                    >
-                                        {isAnalyzing ? 'Analyzing...' : 'Analyze'}
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                )}
-            </div>
-        </main >
+            </main >
+        </ProtectedRoute>
 
     )
 }
