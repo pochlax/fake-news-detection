@@ -4,6 +4,8 @@ import os
 import validators
 import uuid
 import copy
+import firebase_admin
+import google.cloud
 
 from dotenv import load_dotenv
 from src import utils as ut
@@ -16,7 +18,7 @@ from urllib.parse import urlparse
 from flask_cors import CORS
 from datetime import datetime
 from supabase import create_client, Client
-from google.cloud import firestore
+from firebase_admin import credentials, firestore
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -63,24 +65,30 @@ def analyze_article():
         # Get URL from request
         url = request.get_data(as_text=True)
         
-        # Validate URL
-        if not url or not validators.url(url):
-            return jsonify({
-                "error": "Invalid or missing URL",
-                "status": "failed"
-            }), 400
+        # # Validate URL
+        # if not url or not validators.url(url):
+        #     return jsonify({
+        #         "error": "Invalid or missing URL",
+        #         "status": "failed"
+        #     }), 400
             
-        # Extract article information
-        article_info = extract_article_info(url)
+        # # Extract article information
+        # article_info = extract_article_info(url)
         
-        # Run analysis
-        result = orchestrator.analyze_article(
-            article=article_info['article'],
-            author=article_info['author'],
-            publisher=article_info['publisher']
-        )
+        # # Run analysis
+        # result = orchestrator.analyze_article(
+        #     article=article_info['article'],
+        #     author=article_info['author'],
+        #     publisher=article_info['publisher']
+        # )
 
-        result.update(article_info)
+        # result.update(article_info)
+
+        # Opening JSON file
+        f = open('./data/demo_output.txt')
+
+        # returns JSON object as a dictionary
+        result = json.load(f)
 
         if 'recommendation_score' in result:
             # After analysis is complete and you have the result:
@@ -102,10 +110,10 @@ def analyze_article():
             }
             
             supabase.table('user_history').insert(user_history_data).execute()
-        
-        # # Save to Firestore articles collection
-        # doc_ref = db.collection('articles').document(analysis_result['article_id'])
-        # doc_ref.set(analysis_result)
+            
+            # Save to Firestore articles collection
+            doc_ref = db.collection('articles').document(analysis_result['article_id'])
+            doc_ref.set(analysis_result)
         
         return jsonify(result), 200
 
@@ -122,7 +130,10 @@ def analyze_article():
 
 # Initialize Supabase and Firestore clients
 supabase: Client = create_client(os.getenv('NEXT_PUBLIC_SUPABASE_URL'), os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY'))
-# db = firestore.Client()
+cred = credentials.Certificate(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 @app.route('/fetchHistory/<user_id>', methods=['GET'])
 def fetch_history(user_id):
