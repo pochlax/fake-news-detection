@@ -7,10 +7,11 @@ import { HistorySidebar } from "@/components/layout/HistorySidebar"
 
 interface CollapsibleSidebarProps {
     isOpen: boolean
-    setIsOpen: (open: boolean) => void
+    setIsOpen: (isOpen: boolean) => void
+    onArticleSelect: (analysisResult: any) => void
 }
 
-export function CollapsibleSidebar({ isOpen, setIsOpen }: CollapsibleSidebarProps) {
+export function CollapsibleSidebar({ isOpen, setIsOpen, onArticleSelect }: CollapsibleSidebarProps) {
     return (
         <aside
             className={`fixed top-0 left-0 h-full transition-all duration-300 ease-in-out bg-background border-r ${isOpen ? 'w-60' : 'w-0'
@@ -34,7 +35,7 @@ export function CollapsibleSidebar({ isOpen, setIsOpen }: CollapsibleSidebarProp
                         <Search className="h-5 w-5" />
                     </Button>
                 </div>
-                <HistorySidebar />
+                <HistorySidebar onArticleSelect={onArticleSelect} />
             </div>
         </aside>
     )

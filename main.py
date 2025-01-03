@@ -65,6 +65,14 @@ def analyze_article():
         # Get URL from request
         url = request.get_data(as_text=True)
         
+        # Get user_id from headers
+        user_id = request.headers.get('user-id')
+        if not user_id:
+            return jsonify({
+                "error": "User ID is required",
+                "status": "failed"
+            }), 400
+
         # # Validate URL
         # if not url or not validators.url(url):
         #     return jsonify({
@@ -98,11 +106,7 @@ def analyze_article():
             # Save to Supabase user_history
             user_history_data = {
                 'id': str(uuid.uuid4()),
-                # 'user_id': request.headers.get('user_id'),  # Assuming user_id is passed in headers
-                'user_id': str(uuid.uuid4()),
-                # 'article_id': 123,
-                # 'article_title': "Pesticides in Tea",
-                # 'recommendation': 70,
+                'user_id': user_id,  # Use the user_id from headers
                 'article_id': analysis_result['article_id'],
                 'article_title': analysis_result['title'],
                 'recommendation': analysis_result['recommendation_score'],
@@ -188,8 +192,8 @@ def fetch_history(user_id):
 def fetch_article(article_id):
     try:
         # Get article from Firestore
-        # doc_ref = db.collection('articles').document(str(article_id))
-        # doc = doc_ref.get()
+        doc_ref = db.collection('articles').document(str(article_id))
+        doc = doc_ref.get()
         
         if doc.exists:
             return jsonify(doc.to_dict()), 200

@@ -64,10 +64,17 @@ export default function ArticleAnalyzer() {
             setIsAnalyzing(true);
             setError(null);
 
+            // Get userId from localStorage
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                throw new Error('User not authenticated');
+            }
+
             const response = await fetch('http://localhost:5000/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain',
+                    'user-id': userId  // Add userId to headers
                 },
                 body: inputUrl
             });
@@ -105,6 +112,25 @@ export default function ArticleAnalyzer() {
             setIsAnalyzing(false);
         }
     };
+
+    const handleHistoryArticleSelect = (analysisResult: any) => {
+        // Update all the states with the analysis result
+        setArticleContent(analysisResult.article || 'No article content available')
+        setArticleTitle(analysisResult.title || 'Article Content')
+        setTone(analysisResult.tone || 'Unknown')
+        setToneExplanation(analysisResult.tone_explanation || '')
+        setBias(analysisResult.bias || 'Unknown')
+        setBiasExplanation(analysisResult.bias_explanation || '')
+        setSupportedClaims(analysisResult.supported_claims || '')
+        setAuthorTrustability(analysisResult.author_trustability || '')
+        setPublisherTrustability(analysisResult.publisher_trustability || '')
+        setAuthorPublisherExplanation(analysisResult.author_publisher_explanation || '')
+        setSocialSentiment(analysisResult.reddit_comments_sentiment || '')
+        setSocialScore(analysisResult.reddit_sentiment_value || 0)
+        setSocialSentimentExplanation(analysisResult.reddit_sentiment_summary || '')
+        setRecommendation(analysisResult.recommendation || '')
+        setRecommendationScore(analysisResult.recommendation_score || 0)
+    }
 
     // Add new function to format article text with paragraphs
     const formatArticleText = (text: string) => {
@@ -248,11 +274,31 @@ export default function ArticleAnalyzer() {
         return 'bg-red-600';
     };
 
+    const resetAnalysis = () => {
+        setInputUrl('')
+        setArticleContent(null)
+        setArticleTitle('Article Content')
+        setTone('')
+        setToneExplanation('')
+        setBias('')
+        setBiasExplanation('')
+        setSupportedClaims('')
+        setAuthorTrustability('')
+        setPublisherTrustability('')
+        setAuthorPublisherExplanation('')
+        setError(null)
+        setIsAnalyzing(false)
+    }
+
     return (
         <ProtectedRoute>
             <main className="pb-1">
                 <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
-                    <CollapsibleSidebar isOpen={isOpen} setIsOpen={setIsOpen} />
+                    <CollapsibleSidebar
+                        isOpen={isOpen}
+                        setIsOpen={setIsOpen}
+                        onArticleSelect={handleHistoryArticleSelect}
+                    />
 
                     <div className={`flex flex-col flex-grow transition-all duration-300 ${isOpen ? 'ml-60' : 'ml-0'}`}>
                         <header className="border-b bg-white dark:bg-gray-800 px-4 py-3">
@@ -278,7 +324,7 @@ export default function ArticleAnalyzer() {
                                         <Download className="mr-2 h-4 w-4" />
                                         Download Report
                                     </Button>
-                                    <Button>Analyze New Article</Button>
+                                    <Button onClick={resetAnalysis}>Analyze New Article</Button>
                                     <UserIcon />
                                 </div>
                             </div>
