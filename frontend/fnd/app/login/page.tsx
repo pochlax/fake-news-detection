@@ -20,29 +20,33 @@ export default function LoginPage() {
                 });
                 const userInfo = await userInfoResponse.json();
 
-                // // Check/create user profile in Supabase
-                // const response = await fetch('/api/auth/login', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify({
-                //         google_id: userInfo.sub,
-                //         email: userInfo.email,
-                //         name: userInfo.name
-                //     }),
-                // });
+                // Check/create user profile in Supabase
+                const response = await fetch('http://localhost:5000/auth/login/google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        google_id: userInfo.sub,
+                        email: userInfo.email,
+                        name: userInfo.name,
+                        picture: userInfo.picture
+                    }),
+                });
 
-                // if (response.ok) {
-                // Store user details in localStorage
-                localStorage.setItem('userId', userInfo.sub);
-                localStorage.setItem('userEmail', userInfo.email);
-                localStorage.setItem('userName', userInfo.name);
-                localStorage.setItem('userPicture', userInfo.picture || '');
+                if (response.ok) {
 
-                // Redirect to analyzer page
-                router.push('/analyzer');
-                // }
+                    const data = await response.json(); // Parse the JSON response
+
+                    // Store user details in localStorage
+                    localStorage.setItem('userId', data.user.user_id);
+                    localStorage.setItem('userEmail', userInfo.email);
+                    localStorage.setItem('userName', userInfo.name);
+                    localStorage.setItem('userPicture', userInfo.picture || '');
+
+                    // Redirect to analyzer page
+                    router.push('/analyzer');
+                }
             } catch (error) {
                 console.error('Login error:', error);
             }

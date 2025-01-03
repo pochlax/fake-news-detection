@@ -135,6 +135,41 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
+@app.route('/auth/login/google', methods=['POST'])
+def login_google():
+    try:
+        # Get data from request
+        data = request.get_json()
+        user_google_id = data.get('google_id')
+        user_email = data.get('email')
+        user_name = data.get('name')
+        user_picture = data.get('picture', '')  # Default to empty string if no picture
+
+        # Check if user exists in Supabase
+        response = supabase.table('user_profile') \
+            .select('*') \
+            .eq('google_id', user_google_id) \
+            .execute()
+
+        if not response.data:
+            # User doesn't exist, create new profile
+            response = supabase.table('user_profile') \
+                .insert({
+                    'user_id': str(uuid.uuid4()),
+                    'google_id': user_google_id,
+                    'email': user_email,
+                    'name': user_name,
+                    'picture': user_picture
+                }) \
+                .execute()
+
+        return jsonify({
+            'user': response.data[0],
+            'message': 'Authentication successful'
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/fetchHistory/<user_id>', methods=['GET'])
 def fetch_history(user_id):
     try:
