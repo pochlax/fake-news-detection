@@ -17,54 +17,6 @@ interface HistorySidebarProps {
 }
 
 export function HistorySidebar({ onArticleSelect }: HistorySidebarProps) {
-    // import Link from "next/link"
-
-    // export function HistorySidebar() {
-    // const today = [
-    //     {
-    //         title: "CNN Article on Climate Change",
-    //         url: "#",
-    //         score: 85,
-    //     },
-    //     {
-    //         title: "BBC News Brexit Analysis",
-    //         url: "#",
-    //         score: 92,
-    //     },
-    // ]
-
-    // const yesterday = [
-    //     {
-    //         title: "Fox News Economic Report",
-    //         url: "#",
-    //         score: 78,
-    //     },
-    //     {
-    //         title: "Reuters Technology Coverage",
-    //         url: "#",
-    //         score: 95,
-    //     },
-    //     {
-    //         title: "New York Times Opinion Piece",
-    //         url: "#",
-    //         score: 88,
-    //     },
-    // ]
-
-    // const previousWeek = [
-    //     {
-    //         title: "Washington Post Investigation",
-    //         url: "#",
-    //         score: 91,
-    //     },
-    //     {
-    //         title: "The Guardian Environmental Report",
-    //         url: "#",
-    //         score: 89,
-    //     },
-    // ]
-
-
     const [history, setHistory] = useState<HistoryItem[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -170,30 +122,22 @@ export function HistorySidebar({ onArticleSelect }: HistorySidebarProps) {
 
     return (
         <div className="flex h-full flex-col gap-2 p-4">
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1">
                 <div className="grid gap-1">
                     {history.map((item) => (
-                        // <Link
-                        //     key={item.article_id}
-                        //     href={`/analyzer/${item.article_id}`}
-                        //     className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                        // >
-                        //     <span className="line-clamp-1">{item.article_title}</span>
-                        //     <span className="ml-auto text-xs text-muted-foreground">{item.recommendation}%</span>
-                        // </Link>
                         <Button
                             key={item.article_id}
                             variant="ghost"
                             className="w-full justify-start text-left p-3 hover:bg-accent"
                             onClick={() => handleArticleClick(item.article_id)}
                         >
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium truncate max-w-[180px]">
-                                        {item.article_title}
-                                    </span>
-                                    <span className="ml-auto text-xs text-muted-foreground">{item.recommendation}%</span>
-                                </div>
+                            <div className="flex items-center justify-between w-full">
+                                <span className="text-sm font-medium truncate max-w-[160px]">
+                                    {item.article_title}
+                                </span>
+                                <span className="text-xs font-medium shrink-0 ml-2">
+                                    {Math.round(item.recommendation)}%
+                                </span>
                             </div>
                         </Button>
                     ))}
