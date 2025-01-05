@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 // import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 // import { Badge } from "@/components/ui/badge"
-import { Trash2 } from "lucide-react"
+import { Trash2, Clock } from "lucide-react"
 import {
     Dialog,
     DialogContent,
@@ -18,24 +18,28 @@ interface HistoryItem {
     article_id: string
     article_title: string
     recommendation: number
-    created_at: string
+    status?: 'loading' | 'complete'
 }
 
 interface HistorySidebarProps {
     onArticleSelect: (analysisResult: any) => void
+    currentAnalysis?: { url: string; title: string; } | null
+    isAnalyzing: boolean
 }
 
-export function HistorySidebar({ onArticleSelect }: HistorySidebarProps) {
+export function HistorySidebar({ onArticleSelect, currentAnalysis, isAnalyzing }: HistorySidebarProps) {
     const [history, setHistory] = useState<HistoryItem[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [activeArticleId, setActiveArticleId] = useState<string | null>(null)
-    const [deleteItemId, setDeleteItemId] = useState<string | null>(null)
+    // const [deleteItemId, setDeleteItemId] = useState<string | null>(null)
     const [itemToDelete, setItemToDelete] = useState<{ id: string, title: string } | null>(null)
 
     useEffect(() => {
-        fetchUserHistory()
-    }, [])
+        if (!isAnalyzing) {
+            fetchUserHistory()
+        }
+    }, [isAnalyzing])
 
     const fetchUserHistory = async () => {
         try {
@@ -171,6 +175,25 @@ export function HistorySidebar({ onArticleSelect }: HistorySidebarProps) {
                 </div>
                 <div className="flex-1">
                     <div className="grid gap-1">
+                        {/* Current Analysis Item */}
+                        {currentAnalysis && (
+                            <Button
+                                variant="ghost"
+                                className="w-full justify-start text-left p-3 group relative"
+                                disabled
+                            >
+                                <div className="flex items-center justify-between w-full">
+                                    <span className="text-sm font-medium truncate max-w-[120px]">
+                                        {currentAnalysis.title || currentAnalysis.url}
+                                    </span>
+                                    <div className="flex items-center space-x-2">
+                                        <Clock className="h-4 w-4 animate-pulse text-muted-foreground" />
+                                    </div>
+                                </div>
+                            </Button>
+                        )}
+
+                        {/* Existing History Items */}
                         {history.map((item) => (
                             <Button
                                 key={item.article_id}

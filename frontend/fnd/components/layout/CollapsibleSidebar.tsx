@@ -9,9 +9,11 @@ interface CollapsibleSidebarProps {
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
     onArticleSelect: (analysisResult: any) => void
+    currentAnalysis?: { url: string; title: string; } | null
+    isAnalyzing: boolean
 }
 
-export function CollapsibleSidebar({ isOpen, setIsOpen, onArticleSelect }: CollapsibleSidebarProps) {
+export function CollapsibleSidebar({ isOpen, setIsOpen, onArticleSelect, currentAnalysis, isAnalyzing }: CollapsibleSidebarProps) {
     return (
         <aside
             className={`fixed top-0 left-0 h-full transition-all duration-300 ease-in-out bg-background border-r ${isOpen ? 'w-60' : 'w-0'
@@ -35,7 +37,7 @@ export function CollapsibleSidebar({ isOpen, setIsOpen, onArticleSelect }: Colla
                         <Search className="h-5 w-5" />
                     </Button>
                 </div>
-                <HistorySidebar onArticleSelect={onArticleSelect} />
+                <HistorySidebar onArticleSelect={onArticleSelect} currentAnalysis={currentAnalysis} isAnalyzing={isAnalyzing} />
             </div>
         </aside>
     )
