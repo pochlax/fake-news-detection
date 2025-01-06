@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardArticleTitle, CardSubtitle } from "@/components/ui/card"
 import {
     Accordion,
     AccordionContent,
@@ -32,6 +32,7 @@ export default function ArticleAnalyzer() {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [articleTitle, setArticleTitle] = useState('Article Content');
     const [articleContent, setArticleContent] = useState<string | null>(null);
+    const [articleAuthor, setArticleAuthor] = useState<string>('')
     const [error, setError] = useState<string | null>(null);
 
     const [tone, setTone] = useState<string>('');
@@ -43,7 +44,6 @@ export default function ArticleAnalyzer() {
     const [authorTrustability, setAuthorTrustability] = useState<string>('');
     const [publisherTrustability, setPublisherTrustability] = useState<string>('');
     const [authorPublisherExplanation, setAuthorPublisherExplanation] = useState<string>('');
-
 
     const [socialSentiment, setSocialSentiment] = useState<string>('');
     const [socialSentimentExplanation, setSocialSentimentExplanation] = useState<string>('');
@@ -108,6 +108,7 @@ export default function ArticleAnalyzer() {
             if (shouldContinueRef.current) {
                 setArticleContent(result.article || 'No article content available');
                 setArticleTitle(result.title || 'Article Content');
+                setArticleAuthor(result.author || 'Unknown Author')
 
                 // Update tone and bias from response
                 setTone(result.tone || 'Unknown');
@@ -146,6 +147,7 @@ export default function ArticleAnalyzer() {
         // Update all the states with the analysis result
         setArticleContent(analysisResult.article || 'No article content available')
         setArticleTitle(analysisResult.title || 'Article Content')
+        setArticleAuthor(analysisResult.author || 'Unknown Author')
         setTone(analysisResult.tone || 'Unknown')
         setToneExplanation(analysisResult.tone_explanation || '')
         setBias(analysisResult.bias || 'Unknown')
@@ -307,6 +309,7 @@ export default function ArticleAnalyzer() {
         setInputUrl('')
         setArticleContent(null)
         setArticleTitle('Article Content')
+        setArticleAuthor('')
         setTone('')
         setToneExplanation('')
         setBias('')
@@ -405,7 +408,8 @@ export default function ArticleAnalyzer() {
                                     <main className="p-6">
                                         <Card className="col-span-1">
                                             <CardHeader>
-                                                <CardTitle>{articleTitle}</CardTitle>
+                                                <CardArticleTitle>{articleTitle}</CardArticleTitle>
+                                                <CardSubtitle> Written By: {articleAuthor}</CardSubtitle>
                                             </CardHeader>
                                             <CardContent className="prose max-w-none dark:prose-invert">
                                                 {error && (

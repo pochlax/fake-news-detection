@@ -16,10 +16,10 @@ interface CollapsibleSidebarProps {
 export function CollapsibleSidebar({ isOpen, setIsOpen, onArticleSelect, currentAnalysis, isAnalyzing }: CollapsibleSidebarProps) {
     return (
         <aside
-            className={`fixed top-0 left-0 h-full transition-all duration-300 ease-in-out bg-background border-r ${isOpen ? 'w-60' : 'w-0'
-                } overflow-hidden`}
+            className={`fixed top-0 left-0 z-30 h-screen w-60 transition-transform duration-300 bg-background border-r
+                ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
-            <div className="w-60">
+            <div className="h-full flex flex-col overflow-hidden">
                 <div className="flex items-center justify-between p-4">
                     <Button
                         variant="ghost"

@@ -173,7 +173,7 @@ export function HistorySidebar({ onArticleSelect, currentAnalysis, isAnalyzing }
                 <div>
                     <h2 className="text-lg font-semibold mb-4">Search History</h2>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 overflow-y-auto">
                     <div className="grid gap-1">
                         {/* Current Analysis Item */}
                         {currentAnalysis && (
