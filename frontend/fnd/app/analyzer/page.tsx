@@ -15,7 +15,7 @@ import { UserIcon } from "@/components/layout/UserIcon"
 import { CollapsibleSidebar } from "@/components/layout/CollapsibleSidebar"
 import { useRouter } from 'next/navigation'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
-
+import { toast } from "@/hooks/use-toast"
 
 export default function ArticleAnalyzer() {
     const router = useRouter()
@@ -127,6 +127,12 @@ export default function ArticleAnalyzer() {
 
                 setRecommendation(result.recommendation || '');
                 setRecommendationScore(result.recommendation_score || 0);
+            } else {
+                toast({
+                    title: "Analysis Complete",
+                    description: "Your article analysis is ready to view.",
+                    duration: 3000
+                });
             }
 
             // Clear current analysis
