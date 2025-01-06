@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -55,12 +55,22 @@ export default function ArticleAnalyzer() {
     const [isOpen, setIsOpen] = useState(false)
 
     const [currentAnalysis, setCurrentAnalysis] = useState<{ url: string; title: string; } | null>(null);
+    const shouldContinueRef = useRef<boolean>(true);
+
+    // Reset on unmount
+    useEffect(() => {
+        return () => {
+            shouldContinueRef.current = false;
+        };
+    }, []);
 
     const handleLandingPage = () => {
         router.push('/')
     }
 
     const handleAnalyze = async () => {
+        shouldContinueRef.current = true;
+
         try {
             setIsAnalyzing(true);
             setError(null);
@@ -70,6 +80,8 @@ export default function ArticleAnalyzer() {
                 url: inputUrl,
                 title: new URL(inputUrl).hostname // Or any placeholder title
             });
+
+            // setArticleContent(null);
 
             // Get userId from localStorage
             const userId = localStorage.getItem('userId');
@@ -91,26 +103,30 @@ export default function ArticleAnalyzer() {
             }
 
             const result = await response.json();
-            setArticleContent(result.article || 'No article content available');
-            setArticleTitle(result.title || 'Article Content');
+            // console.log("Fetching Complete, this is the value of articleContent", articleContent)
 
-            // Update tone and bias from response
-            setTone(result.tone || 'Unknown');
-            setToneExplanation(result.tone_explanation || '');
-            setBias(result.bias || 'Unknown');
-            setBiasExplanation(result.bias_explanation || '');
-            setSupportedClaims(result.supported_claims || '');
+            if (shouldContinueRef.current) {
+                setArticleContent(result.article || 'No article content available');
+                setArticleTitle(result.title || 'Article Content');
 
-            setAuthorTrustability(result.author_trustability || '');
-            setPublisherTrustability(result.publisher_trustability || '');
-            setAuthorPublisherExplanation(result.author_publisher_explanation || '');
+                // Update tone and bias from response
+                setTone(result.tone || 'Unknown');
+                setToneExplanation(result.tone_explanation || '');
+                setBias(result.bias || 'Unknown');
+                setBiasExplanation(result.bias_explanation || '');
+                setSupportedClaims(result.supported_claims || '');
 
-            setSocialSentiment(result.reddit_comments_sentiment || '');
-            setSocialScore(result.reddit_sentiment_value || 0);
-            setSocialSentimentExplanation(result.reddit_sentiment_summary || '');
+                setAuthorTrustability(result.author_trustability || '');
+                setPublisherTrustability(result.publisher_trustability || '');
+                setAuthorPublisherExplanation(result.author_publisher_explanation || '');
 
-            setRecommendation(result.recommendation || '');
-            setRecommendationScore(result.recommendation_score || 0);
+                setSocialSentiment(result.reddit_comments_sentiment || '');
+                setSocialScore(result.reddit_sentiment_value || 0);
+                setSocialSentimentExplanation(result.reddit_sentiment_summary || '');
+
+                setRecommendation(result.recommendation || '');
+                setRecommendationScore(result.recommendation_score || 0);
+            }
 
             // Clear current analysis
             setCurrentAnalysis(null);
@@ -125,6 +141,8 @@ export default function ArticleAnalyzer() {
     };
 
     const handleHistoryArticleSelect = (analysisResult: any) => {
+        shouldContinueRef.current = false;
+
         // Update all the states with the analysis result
         setArticleContent(analysisResult.article || 'No article content available')
         setArticleTitle(analysisResult.title || 'Article Content')
@@ -345,7 +363,7 @@ export default function ArticleAnalyzer() {
 
                         {/* Content area with loading overlay */}
                         <div className="flex-1 relative">
-                            {isAnalyzing && (
+                            {isAnalyzing && !articleContent && (
                                 <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-50">
                                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                                 </div>
@@ -395,7 +413,7 @@ export default function ArticleAnalyzer() {
                                                         {error}
                                                     </div>
                                                 )}
-                                                {isAnalyzing ? (
+                                                {!articleContent ? (
                                                     <div className="text-center py-4">
                                                         <p>Analyzing article...</p>
                                                     </div>
@@ -588,34 +606,6 @@ export default function ArticleAnalyzer() {
                                 </div>
                             )}
                         </div>
-
-                        {/* Bottom URL input card */}
-                        {articleContent && (
-                            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-                                <Card className="w-[400px] shadow-lg">
-                                    <CardContent className="p-3">
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="url"
-                                                value={inputUrl}
-                                                onChange={(e) => setInputUrl(e.target.value)}
-                                                disabled={isAnalyzing}
-                                                placeholder="Enter article URL to analyze..."
-                                                className="flex-1 px-3 py-2 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                                aria-label="Article URL input"
-                                            />
-                                            <Button
-                                                size="sm"
-                                                onClick={handleAnalyze}
-                                                disabled={isAnalyzing || !inputUrl}
-                                            >
-                                                {isAnalyzing ? 'Analyzing...' : 'Analyze'}
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        )}
                     </div>
                 </div>
             </main>

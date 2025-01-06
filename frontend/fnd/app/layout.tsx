@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from '@/contexts/AuthContext'
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { Toaster } from "@/components/ui/toaster"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,6 +36,7 @@ export default function RootLayout({
             {children}
           </AuthProvider>
         </GoogleOAuthProvider>
+        <Toaster />
       </body>
     </html>
   );
