@@ -130,7 +130,7 @@ export default function ArticleAnalyzer() {
             } else {
                 toast({
                     title: "Analysis Complete",
-                    description: "Your article analysis is ready to view.",
+                    description: "Your article analysis is ready to view!",
                     duration: 3000
                 });
             }
@@ -373,8 +373,12 @@ export default function ArticleAnalyzer() {
                         {/* Content area with loading overlay */}
                         <div className="flex-1 relative">
                             {isAnalyzing && !articleContent && (
-                                <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-50">
-                                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                                <div className="absolute inset-0 bg-white flex flex-col items-center justify-center z-50">
+                                    <p className="text-lg font-medium mb-4">Analyzing</p>
+                                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                                    <p className="text-sm text-gray-600 text-center max-w-md px-4">
+                                        We are generating your analysis, feel free to explore other reports and we will alert you when the analysis is complete!
+                                    </p>
                                 </div>
                             )}
 

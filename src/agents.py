@@ -345,6 +345,8 @@ def run_social_media_analysis(state: AgentState) -> AgentState:
                 total_sentiment += sentiment['average_score']
                 del post['comments']
 
+            total_sentiment = (total_sentiment + 1) / 2 # This makes sure that the sentiment is between 0 and 2.
+
             total_sentiment = max(0, min(100, round(total_sentiment * 100)))
             # total_sentiment = 73                                                        # Hardcoding to 73 for demo, remove later
 
