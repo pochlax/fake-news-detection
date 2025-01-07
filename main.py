@@ -123,6 +123,8 @@ def analyze_article():
             doc_ref.set(analysis_result)
 
         # time.sleep(5)
+
+        result['article_id'] = analysis_result['article_id']
         
         return jsonify(result), 200
 
