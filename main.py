@@ -6,6 +6,8 @@ import uuid
 import copy
 import firebase_admin
 import google.cloud
+# import requests
+# import time
 
 from dotenv import load_dotenv
 from src import utils as ut
@@ -73,30 +75,31 @@ def analyze_article():
                 "status": "failed"
             }), 400
 
-        # # Validate URL
-        # if not url or not validators.url(url):
-        #     return jsonify({
-        #         "error": "Invalid or missing URL",
-        #         "status": "failed"
-        #     }), 400
+        # Validate URL
+        if not url or not validators.url(url):
+            return jsonify({
+                "error": "Invalid or missing URL",
+                "status": "failed"
+            }), 400
             
-        # # Extract article information
-        # article_info = extract_article_info(url)
+        # Extract article information
+        article_info = extract_article_info(url)
         
-        # # Run analysis
-        # result = orchestrator.analyze_article(
-        #     article=article_info['article'],
-        #     author=article_info['author'],
-        #     publisher=article_info['publisher']
-        # )
+        # Run analysis
+        result = orchestrator.analyze_article(
+            article=article_info['article'],
+            author=article_info['author'],
+            publisher=article_info['publisher']
+        )
 
-        # result.update(article_info)
+        result.update(article_info)
 
-        # Opening JSON file
-        f = open('./data/demo_output.txt')
+        ## FOR DEVELOPMENT ###
+        # # Opening JSON file
+        # f = open('./data/demo_output.txt')
 
         # returns JSON object as a dictionary
-        result = json.load(f)
+        # result = json.load(f)
 
         if 'recommendation_score' in result:
             # After analysis is complete and you have the result:
@@ -118,6 +121,8 @@ def analyze_article():
             # Save to Firestore articles collection
             doc_ref = db.collection('articles').document(analysis_result['article_id'])
             doc_ref.set(analysis_result)
+
+        # time.sleep(5)
         
         return jsonify(result), 200
 
@@ -201,6 +206,37 @@ def fetch_article(article_id):
             return jsonify({'error': 'Article not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# @app.route('/proxy', methods=['GET'])
+# def proxy():
+#     # URL of the target website
+#     target_url = "https://www.cbc.ca/news/canada/pesticide-traces-in-some-tea-exceed-allowable-limits-1.2564624"
+
+#     try:
+#         # Fetch the content from the target website
+#         response = requests.get(target_url, headers={'User-Agent': 'Mozilla/5.0'})
+#         response.raise_for_status()  # Check for HTTP request errors
+#         return response.text  # Return the content of the target website
+#     except requests.exceptions.RequestException as e:
+#         # Handle errors and return a meaningful message
+#         return jsonify({"error": str(e)}), 500
+
+# # def proxy():
+# #     # Build the full URL for the target request
+# #     url = "https://www.cbc.ca/news/canada/pesticide-traces-in-some-tea-exceed-allowable-limits-1.2564624"
+
+# #     # Forward the request to the target website
+# #     try:
+# #         response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, stream=True)
+# #         response.raise_for_status()
+
+# #         # Create a Flask Response with the same content and headers
+# #         excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+# #         headers = {key: value for key, value in response.headers.items() if key.lower() not in excluded_headers}
+
+# #         return Response(response.content, status=response.status_code, headers=headers)
+# #     except requests.exceptions.RequestException as e:
+# #         return Response(f"Error fetching content: {str(e)}", status=500)
 
 # Error handlers
 @app.errorhandler(404)

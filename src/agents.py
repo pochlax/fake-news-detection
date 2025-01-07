@@ -10,7 +10,6 @@ from pydantic import BaseModel, Field
 from transformers import pipeline
 from statistics import mean
 
-# from langchain_community.llms import OpenAI
 from openai import OpenAI
 from langchain_openai import ChatOpenAI
 from langchain.chains import LLMChain
@@ -57,29 +56,9 @@ Example output:
 }}\'
 """
 
-# The report will be structured as follows:
-
-# 1. Introduction:
-# - Title: The title of the article
-# - Summary: A short summary of the article. Maximum of 100 words.
-
-# 2. Main Body Section:
-# - Content Analysis: A detailed analysis of the article's content. Specifically, a detailed explanation 
-# of the non-factual (speculative,hypothetical, etc.) and opinions made in the article. Explain how the tone and bias 
-# of the article supports or misleads the reader.
-
-# - Source Analysis: A detailed analysis of the author's background and credibility of the source organization.
-
-# - Social Media Analysis: A detailed analysis of the sentiment of the article's topic on social media. Verifies if the article tone is 
-# consistent with the sentiment on social media.
-
-# 3. Conclusion:
-# - Recommendation: A recommendation on whether the article is credible or not. Use the findings from the content analysis (tone, bias, ratio of 
-# factual to non-factual and opinionated claims), source analysis(author and publisher trustability), and social media sentiment to make the recommendation.
-
 class ReportWriterAgent:
     def __init__(self, api_key: str):
-        self.llm = ChatOpenAI(temperature=0, model="gpt-4o", api_key=api_key)
+        self.llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=api_key)
     
     def write_report(self, factual_length: int, 
         non_factual_and_opinion_length: int, 
@@ -140,25 +119,6 @@ default to "No non-factual or opinionated sections detected.",
 "article_summary": A summary of the article. Limit the summary to 150 words.
 """
 
-# # Old version of prompt 
-# content_analysis_prompt = """
-# You are an expert at analyzing articles.
-
-# You will be provided with an article as input.
-
-# Your goal is to extract factual, non-factual (speculative,hypothetical, etc.) and opinionated sections of the article. 
-# You can use the Tavily Search tool to confirm the factual statements (if needed). 
-
-# You will need to return following sections:
-# - factual: A list of factual statements.
-# - non_factual: A list of non-factual statements.
-# - opinionated: A list of opinionated statements.
-# - findingsSummary: A summarry of how the non-factual and opinionated sections detected might mislead the reader. 
-# Pick the most important findings and limit the summary to 150 words. If there are no non-factual or opinionated sections, 
-# default to "No non-factual or opinionated sections detected."
-# - tavily_search: A list of sources that were used to confirm the factual statements.
-# """
-
 class ContentAnalysisAgent:
     def __init__(self):
         self.factual = []
@@ -187,7 +147,7 @@ class ContentAnalysisAgent:
         # Initialize LLM
         llm = ChatOpenAI(
             api_key=api_key,
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             temperature=0.3
         )
 
@@ -253,7 +213,7 @@ class SourceAnalysisAgent:
         # llm = OpenAI(api_key=api_key)  
         llm = ChatOpenAI(
             api_key=api_key,
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             temperature=1
         )
 
@@ -303,51 +263,54 @@ class AgentState(TypedDict):
     reddit_sentiment_value: int
     reddit_sentiment_summary: str
     source_analysis: dict
-    content_analysis: dict
-    article_summary: str
     social_media_analysis: dict
     recommendation: str
     recommendation_score: int
+
 # Define agent nodes
 def run_source_analysis(state: AgentState) -> AgentState:
     """Analyze source credibility"""
-    source_agent = SourceAnalysisAgent()
-    result = source_agent.analyze_source(
-        state["input_author"],
-        state["input_publisher"],
-        os.getenv("OPENAI_API_KEY"), 
-        os.getenv("TAVILY_API_KEY")
-    )
-    # state["source_analysis"] = result
-    formatted_json = json.loads(result["output"])
-    state["author_trustability"] = formatted_json["author_trustability"]
-    state["publisher_trustability"] = formatted_json["publisher_trustability"]
-    state["author_publisher_explanation"] = formatted_json["findingsSummary"]
-    state["source_analysis_biblio"] = formatted_json["tavily_search"]
-    return state
+    try:
+        source_agent = SourceAnalysisAgent()
+        result = source_agent.analyze_source(
+            state["input_author"],
+            state["input_publisher"],
+            os.getenv("OPENAI_API_KEY"), 
+            os.getenv("TAVILY_API_KEY")
+        )
+        formatted_json = json.loads(result["output"])
+        state["author_trustability"] = formatted_json["author_trustability"]
+        state["publisher_trustability"] = formatted_json["publisher_trustability"]
+        state["author_publisher_explanation"] = formatted_json["findingsSummary"]
+        state["source_analysis_biblio"] = formatted_json["tavily_search"]
+        return state
+    except Exception as e:
+        raise Exception(f"Source Analysis node failed: {str(e)}") from e
 
 def run_content_analysis(state: AgentState) -> AgentState:
     """Analyze content and generate summary"""
-    content_agent = ContentAnalysisAgent()
-    result = content_agent.analyze_content(
-        state["input_article"],
-        os.getenv("OPENAI_API_KEY"), 
-        os.getenv("TAVILY_API_KEY")
-    )
-    # state["content_analysis"] = result
-    formatted_json = json.loads(result["output"])
-    state["article_summary"] = formatted_json["article_summary"]
-    state["facts_dict"] = formatted_json["factual"]
-    state["non_facts_dict"] = formatted_json["non_factual"]
-    state["opinions_dict"] = formatted_json["opinionated"]
-    state["tone"] = formatted_json["tone"]
-    state["tone_explanation"] = formatted_json["tone_explanation"]
-    state["bias"] = formatted_json["bias"]
-    state["bias_explanation"] = formatted_json["bias_explanation"]
-    state["supported_claims"] = formatted_json["supported_claims"]
-    state["content_analysis"] = formatted_json["findingsSummary"]
-    state["content_analysis_biblio"] = formatted_json["tavily_search"]
-    return state
+    try:
+        content_agent = ContentAnalysisAgent()
+        result = content_agent.analyze_content(
+            state["input_article"],
+            os.getenv("OPENAI_API_KEY"), 
+            os.getenv("TAVILY_API_KEY")
+        )
+        formatted_json = json.loads(result["output"])
+        state["article_summary"] = formatted_json["article_summary"]
+        state["facts_dict"] = formatted_json["factual"]
+        state["non_facts_dict"] = formatted_json["non_factual"]
+        state["opinions_dict"] = formatted_json["opinionated"]
+        state["tone"] = formatted_json["tone"]
+        state["tone_explanation"] = formatted_json["tone_explanation"]
+        state["bias"] = formatted_json["bias"]
+        state["bias_explanation"] = formatted_json["bias_explanation"]
+        state["supported_claims"] = formatted_json["supported_claims"]
+        state["content_analysis"] = formatted_json["findingsSummary"]
+        state["content_analysis_biblio"] = formatted_json["tavily_search"]
+        return state
+    except Exception as e:
+        raise Exception(f"Content Analysis node failed: {str(e)}") from e
 
 def categorize_value(x):
     if 67 <= x <= 100:
@@ -361,64 +324,63 @@ def categorize_value(x):
 
 def run_social_media_analysis(state: AgentState) -> AgentState:
     """Analyze social media and generate summary"""
+    try:
+        social_media_agent = SocialMediaAgent(
+            os.getenv("OPENAI_API_KEY"),
+            os.getenv("REDDIT_CLIENT_ID"), 
+            os.getenv("REDDIT_CLIENT_SECRET"), 
+            os.getenv("REDDIT_USER_AGENT")
+        )
 
-    social_media_agent = SocialMediaAgent(
-        os.getenv("OPENAI_API_KEY"),
-        os.getenv("REDDIT_CLIENT_ID"), 
-        os.getenv("REDDIT_CLIENT_SECRET"), 
-        os.getenv("REDDIT_USER_AGENT")
-    )
+        result = social_media_agent.analyze_social_media(
+            state["input_article"]
+        )
 
-    result = social_media_agent.analyze_social_media(
-        state["input_article"]
-    )
+        total_sentiment = 0
+        
+        if result['success']:
+            for post in result['posts']:
+                sentiment = social_media_agent.sentiment_analyzer.analyze_sentiment(post['comments'])
+                post['sentiment'] = sentiment
+                total_sentiment += sentiment['average_score']
+                del post['comments']
 
-    total_sentiment = 0
-    
-    if result['success']:
-        for post in result['posts']:
-            sentiment = social_media_agent.sentiment_analyzer.analyze_sentiment(post['comments'])
-            post['sentiment'] = sentiment
-            total_sentiment += sentiment['average_score']
-            del post['comments']
+            total_sentiment = max(0, min(100, round(total_sentiment * 100)))
+            # total_sentiment = 73                                                        # Hardcoding to 73 for demo, remove later
 
-    total_sentiment = max(0, min(100, round(total_sentiment * 100)))
-
-    state['reddit_posts'] = result['posts']
-    state['reddit_comments_sentiment'] = categorize_value(total_sentiment)
-    state['reddit_sentiment_value'] = total_sentiment
-    state['reddit_sentiment_summary'] = social_media_agent._summarize_sentiment(result['posts'])
-    return state
+            state['reddit_posts'] = result['posts']
+            state['reddit_comments_sentiment'] = categorize_value(total_sentiment)
+            state['reddit_sentiment_value'] = total_sentiment
+            state['reddit_sentiment_summary'] = social_media_agent._summarize_sentiment(result['posts'])
+            return state
+    except Exception as e:
+        raise Exception(f"Social Media Analysis node failed: {str(e)}") from e
 
 def run_report_writer(state: AgentState) -> AgentState:
     """Analyze results and generate report"""
-    report_agent = ReportWriterAgent(os.getenv("OPENAI_API_KEY"))
-    # result = content_agent.analyze_content(
-    #     state["input_article"],
-    #     os.getenv("OPENAI_API_KEY"), 
-    #     os.getenv("TAVILY_API_KEY")
-    # )
+    try:
+        report_agent = ReportWriterAgent(os.getenv("OPENAI_API_KEY"))
 
-    result = report_agent.write_report(
-        len(state["facts_dict"]),
-        len(state["non_facts_dict"]) + len(state["opinions_dict"]),
-        state["tone"],
-        state["tone_explanation"],
-        state["bias"],
-        state["bias_explanation"],
-        state["supported_claims"],
-        state["author_trustability"],
-        state["publisher_trustability"],
-        state["reddit_sentiment_summary"]
-    )
+        result = report_agent.write_report(
+            len(state["facts_dict"]),
+            len(state["non_facts_dict"]) + len(state["opinions_dict"]),
+            state["tone"],
+            state["tone_explanation"],
+            state["bias"],
+            state["bias_explanation"],
+            state["supported_claims"],
+            state["author_trustability"],
+            state["publisher_trustability"],
+            state["reddit_sentiment_summary"]
+        )
 
-    # print(result)
+        formatted_json = json.loads(result)
+        state["recommendation"] = formatted_json["recommendation"]
+        state["recommendation_score"] = formatted_json["recommendation_score"]
 
-    formatted_json = json.loads(result)
-    state["recommendation"] = formatted_json["recommendation"]
-    state["recommendation_score"] = formatted_json["recommendation_score"]
-
-    return state
+        return state
+    except Exception as e:
+        raise Exception(f"Report Writer node failed: {str(e)}") from e
 
 def fake_news_analysis_workflow():
     # Initialize the graph
@@ -433,7 +395,6 @@ def fake_news_analysis_workflow():
     # Define the flow
     workflow.add_edge("run_content", "run_source")
     workflow.add_edge("run_source", "run_social")
-    # workflow.add_edge("run_social", END)
     workflow.add_edge("run_social", "run_report")
     workflow.add_edge("run_report", END)
 
@@ -444,7 +405,6 @@ def fake_news_analysis_workflow():
     return workflow.compile()
 
 
-# Usage class
 class NewsAnalysisOrchestrator:
     def __init__(self):
         self.workflow = fake_news_analysis_workflow()
@@ -457,21 +417,53 @@ class NewsAnalysisOrchestrator:
                 "input_article": article,
                 "input_author": author,
                 "input_publisher": publisher,
-                "source_analysis": {},
-                "content_analysis": {},
                 "article_summary": "",
+                "facts_dict": {},
+                "non_facts_dict": {},
+                "opinions_dict": {},
+                "tone": "",
+                "tone_explanation": "",
+                "bias": "",
+                "bias_explanation": "",
+                "supported_claims": "",
+                "content_analysis": {},
+                "content_analysis_biblio": {},
+                "author_trustability": "",
+                "publisher_trustability": "",
+                "author_publisher_explanation": "",
+                "source_analysis_biblio": {},
+                "reddit_posts": [],
+                "reddit_comments_sentiment": "",
+                "reddit_sentiment_value": 0,
+                "reddit_sentiment_summary": "",
+                "source_analysis": {},
                 "social_media_analysis": {},
+                "recommendation": "",
+                "recommendation_score": 0,
                 "final_output": {}
             }
 
             # Run workflow
             result = self.workflow.invoke(initial_state)
-
             return result
 
         except Exception as e:
+            error_msg = str(e)
+            node_name = None
+            
+            # Extract node name from error message if present
+            if "Content Analysis node failed" in error_msg:
+                node_name = "Content Analysis"
+            elif "Source Analysis node failed" in error_msg:
+                node_name = "Source Analysis"
+            elif "Social Media Analysis node failed" in error_msg:
+                node_name = "Social Media Analysis"
+            elif "Report Writer node failed" in error_msg:
+                node_name = "Report Writer"
+
             return {
-                "error": str(e),
+                "error": error_msg,
+                "failed_node": node_name,
                 "status": "failed"
             }
 

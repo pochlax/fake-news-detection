@@ -98,7 +98,7 @@ class SentimentAnalyzer:
 
 class SocialMediaAgent:
     def __init__(self, api_key: str, reddit_api_id: str, reddit_api_secret: str, reddit_user_agent: str):
-        self.llm = ChatOpenAI(temperature=0, model="gpt-4o", api_key=api_key)
+        self.llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=api_key)
         self.reddit_tool = RedditSearchTool(reddit_api_id, reddit_api_secret, reddit_user_agent)
         self.sentiment_analyzer = SentimentAnalyzer()
 
