@@ -16,6 +16,7 @@ import { CollapsibleSidebar } from "@/components/layout/CollapsibleSidebar"
 import { useRouter } from 'next/navigation'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { toast } from "@/hooks/use-toast"
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
 
 export default function ArticleAnalyzer() {
     const router = useRouter()
@@ -28,6 +29,7 @@ export default function ArticleAnalyzer() {
     //     }
     // }, [router])
 
+    const [articleId, setArticleId] = useState<string | null>(null);
     const [inputUrl, setInputUrl] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [articleTitle, setArticleTitle] = useState('Article Content');
@@ -54,8 +56,30 @@ export default function ArticleAnalyzer() {
     const [recommendationScore, setRecommendationScore] = useState<number>(0);
     const [isOpen, setIsOpen] = useState(false)
 
+    enum PDFStatus {
+        NOT_STARTED = 'not started',
+        IN_PROGRESS = 'in progress',
+        COMPLETE = 'complete',
+    }
+
+    const [pdfLoading, setPdfLoading] = useState<PDFStatus>(PDFStatus.NOT_STARTED)
+
     const [currentAnalysis, setCurrentAnalysis] = useState<{ url: string; title: string; } | null>(null);
     const shouldContinueRef = useRef<boolean>(true);
+
+    // PDF Document component
+    const EmptyReport = () => (
+        <Document>
+            <Page size="A4" style={styles.page}>
+                <View style={styles.section}>
+                    <Text style={styles.title}>{"This PDF is empty"}</Text>
+                </View>
+            </Page>
+        </Document>
+    );
+
+    // Create a state to store the PDF document
+    const [pdfDocument, setPdfDocument] = useState<React.ReactElement>(<EmptyReport />);
 
     // Reset on unmount
     useEffect(() => {
@@ -74,6 +98,8 @@ export default function ArticleAnalyzer() {
         try {
             setIsAnalyzing(true);
             setError(null);
+            setArticleId(null)
+            setPdfLoading(PDFStatus.NOT_STARTED)
 
             // Set current analysis
             setCurrentAnalysis({
@@ -106,6 +132,7 @@ export default function ArticleAnalyzer() {
             // console.log("Fetching Complete, this is the value of articleContent", articleContent)
 
             if (shouldContinueRef.current) {
+                setArticleId(result.article_id || null)
                 setArticleContent(result.article || 'No article content available');
                 setArticleTitle(result.title || 'Article Content');
                 setArticleAuthor(result.author || 'Unknown Author')
@@ -152,6 +179,7 @@ export default function ArticleAnalyzer() {
 
         // Update all the states with the analysis result
         setArticleContent(analysisResult.article || 'No article content available')
+        setArticleId(analysisResult.article_id || null)
         setArticleTitle(analysisResult.title || 'Article Content')
         setArticleAuthor(analysisResult.author || 'Unknown Author')
         setTone(analysisResult.tone || 'Unknown')
@@ -167,6 +195,7 @@ export default function ArticleAnalyzer() {
         setSocialSentimentExplanation(analysisResult.reddit_sentiment_summary || '')
         setRecommendation(analysisResult.recommendation || '')
         setRecommendationScore(analysisResult.recommendation_score || 0)
+        setPdfLoading(PDFStatus.NOT_STARTED)
     }
 
     // Add new function to format article text with paragraphs
@@ -312,6 +341,7 @@ export default function ArticleAnalyzer() {
     };
 
     const resetAnalysis = () => {
+        setArticleId(null)
         setInputUrl('')
         setArticleContent(null)
         setArticleTitle('Article Content')
@@ -326,7 +356,115 @@ export default function ArticleAnalyzer() {
         setAuthorPublisherExplanation('')
         setError(null)
         setIsAnalyzing(false)
+        setPdfDocument(<EmptyReport />)
+        setPdfLoading(PDFStatus.NOT_STARTED)
     }
+
+    const fetchArticleData = async (articleId: string) => {
+        const userId = localStorage.getItem('userId');
+        if (!userId) throw new Error('User not authenticated');
+
+        const response = await fetch(`http://localhost:5000/fetchArticle/${articleId}`, {
+            headers: {
+                'user-id': userId
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    };
+
+    // PDF styles
+    const styles = StyleSheet.create({
+        page: { padding: 40 },
+        title: { fontSize: 24, marginBottom: 10 },
+        subtitle: { fontSize: 16, marginBottom: 20, color: '#666' },
+        section: { marginBottom: 20 },
+        heading: { fontSize: 18, marginBottom: 10, fontWeight: 'bold' },
+        subheading: { fontSize: 14, marginBottom: 5, fontWeight: 'bold' },
+        text: { fontSize: 12, marginBottom: 10, lineHeight: 1.5 },
+        score: { fontSize: 16, marginBottom: 10 },
+        link: { fontSize: 10, color: '#0066cc', marginBottom: 5 }
+    });
+
+    // PDF Document component
+    const AnalysisReport = ({ data }: { data: any }) => (
+        <Document>
+            <Page size="A4" style={styles.page}>
+                <View style={styles.section}>
+                    <Text style={styles.title}>{data.title}</Text>
+                    <Text style={styles.subtitle}>Written By: {data.author}</Text>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.heading}>Introduction</Text>
+                    <Text style={styles.text}>{data.article_summary}</Text>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.heading}>Analysis Categories</Text>
+
+                    <Text style={styles.subheading}>Content Analysis</Text>
+                    <Text style={styles.text}>{data.content_analysis}</Text>
+
+                    <Text style={styles.subheading}>Tone Analysis</Text>
+                    <Text style={styles.text}>Tone: {data.tone}</Text>
+                    <Text style={styles.text}>{data.tone_explanation}</Text>
+
+                    <Text style={styles.subheading}>Bias Analysis</Text>
+                    <Text style={styles.text}>Bias: {data.bias}</Text>
+                    <Text style={styles.text}>{data.bias_explanation}</Text>
+
+                    <Text style={styles.subheading}>Source Credibility</Text>
+                    <Text style={styles.text}>{data.author_publisher_explanation}</Text>
+                    <Text style={styles.text}>Author: {data.author}</Text>
+                    <Text style={styles.text}>Publisher: {data.publisher}</Text>
+
+                    <Text style={styles.subheading}>Social Analysis</Text>
+                    <Text style={styles.text}>{data.reddit_sentiment_summary}</Text>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.heading}>Conclusion</Text>
+                    <Text style={styles.text}>{data.recommendation}</Text>
+                    <Text style={styles.score}>Credibility Score: {data.recommendation_score}%</Text>
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.heading}>Appendix - References</Text>
+                    {[
+                        ...(data.content_analysis_biblio || []),
+                        ...(data.source_analysis_biblio || []),
+                        ...(data.reddit_posts?.map((post: any) => post.url) || [])
+                    ].map((link: string, index: number) => (
+                        <Text key={index} style={styles.link}>{link}</Text>
+                    ))}
+                </View>
+            </Page>
+        </Document>
+    );
+
+    // Modify handleDownloadReport to update the state
+    const handleDownloadReport = async () => {
+        try {
+            console.log("Pressed! ArticleID:", articleId)
+            setPdfLoading(PDFStatus.IN_PROGRESS)
+            if (!articleId) throw new Error('Article ID is required');
+            const articleData = await fetchArticleData(articleId);
+            setPdfDocument(<AnalysisReport data={articleData} />);
+            setPdfLoading(PDFStatus.COMPLETE)
+        } catch (error) {
+            console.error('Error generating report:', error);
+            toast({
+                title: "Error",
+                description: "Failed to generate report",
+                variant: "destructive"
+            });
+        }
+    };
 
     return (
         <ProtectedRoute>
@@ -360,10 +498,29 @@ export default function ArticleAnalyzer() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <Button variant="ghost">
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Download Report
-                                    </Button>
+                                    {pdfLoading != PDFStatus.NOT_STARTED ? (
+                                        <PDFDownloadLink
+                                            document={pdfDocument}
+                                            fileName={`analysis-report-${articleTitle}.pdf`}
+                                        >
+                                            <Button variant="ghost" disabled={pdfLoading == PDFStatus.IN_PROGRESS}>
+                                                <Download className="mr-2 h-4 w-4" />
+                                                {pdfLoading == PDFStatus.IN_PROGRESS ? 'Generating...' : 'Download Report'}
+                                            </Button>
+
+                                        </PDFDownloadLink>
+                                    ) : (
+                                        <Button
+                                            variant="ghost"
+                                            onClick={handleDownloadReport}
+                                            disabled={!articleContent}
+                                        >
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Prepare PDF Report
+                                        </Button>
+                                    )}
+
+
                                     <Button onClick={resetAnalysis}>Analyze New Article</Button>
                                     <UserIcon />
                                 </div>
@@ -622,8 +779,8 @@ export default function ArticleAnalyzer() {
                         </div>
                     </div>
                 </div>
-            </main>
-        </ProtectedRoute>
+            </main >
+        </ProtectedRoute >
     )
 }
 
