@@ -8,11 +8,11 @@ interface HeroProps {
 
 export function Hero({ onStartTrial }: HeroProps) {
     return (
-        <section className="pt-32 pb-16 px-4 overflow-hidden">
+        <section className="min-h-screen flex items-center justify-center px-4 overflow-hidden">
             <div className="container mx-auto max-w-4xl">
                 <div className="text-center space-y-8">
-                    <Badge variant="outline" className="text-sm border-black/20 shadow-sm">
-                        AI-Powered Fact Checking
+                    <Badge variant="outline" className="text-lg border-black/20 shadow-sm">
+                        ✨ AI-Powered Fact Checking
                     </Badge>
                     <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
                         Detect Fake News with

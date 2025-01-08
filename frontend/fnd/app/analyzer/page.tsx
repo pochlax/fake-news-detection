@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { toast } from "@/hooks/use-toast"
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+import Image from "next/image"
 
 export default function ArticleAnalyzer() {
     const router = useRouter()
@@ -540,32 +541,104 @@ export default function ArticleAnalyzer() {
                             )}
 
                             {!articleContent ? (
-                                // Welcome screen
-                                <div className="flex-grow flex flex-col items-center justify-center p-6">
-                                    <h1 className="text-2xl font-semibold mb-8">What can I help you analyze?</h1>
+                                <div className="flex-grow flex flex-col items-center justify-center p-6 min-h-screen">
+                                    <h1 className="text-4xl font-semibold mb-8">What can I help you analyze?</h1>
                                     <div className="w-full max-w-xl">
-                                        <Card className="shadow-lg">
-                                            <CardContent className="p-3">
-                                                <div className="flex gap-2">
-                                                    <input
-                                                        type="url"
-                                                        value={inputUrl}
-                                                        onChange={(e) => setInputUrl(e.target.value)}
-                                                        disabled={isAnalyzing}
-                                                        placeholder="Enter article URL to analyze..."
-                                                        className="flex-1 px-3 py-2 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                                        aria-label="Article URL input"
-                                                    />
-                                                    <Button
-                                                        size="sm"
-                                                        onClick={handleAnalyze}
-                                                        disabled={isAnalyzing || !inputUrl}
-                                                    >
-                                                        {isAnalyzing ? 'Analyzing...' : 'Analyze'}
-                                                    </Button>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
+                                        <div className="flex gap-4">
+                                            <input
+                                                type="url"
+                                                value={inputUrl}
+                                                onChange={(e) => setInputUrl(e.target.value)}
+                                                disabled={isAnalyzing}
+                                                placeholder="Enter article URL to analyze..."
+                                                className="flex-1 h-12 px-4 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                                aria-label="Article URL input"
+                                            />
+                                            <Button
+                                                onClick={handleAnalyze}
+                                                disabled={isAnalyzing || !inputUrl}
+                                                className="h-12 px-6"
+                                            >
+                                                {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <div className="w-full max-w-5xl mt-16">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h2 className="text-xl font-semibold">Trending Articles</h2>
+                                            <Button variant="ghost" size="sm">View all</Button>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            <Card className="group cursor-pointer hover:shadow-lg transition-shadow">
+                                                <CardContent className="p-0">
+                                                    <div className="aspect-[2/1] bg-muted relative overflow-hidden">
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0 z-10" />
+                                                        <Image
+                                                            src="https://picsum.photos/800/400?random=14"
+                                                            alt="Article thumbnail"
+                                                            width={800}
+                                                            height={400}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                        <div className="absolute bottom-4 left-4 right-4 z-20">
+                                                            <p className="text-white font-medium line-clamp-2">
+                                                                Breaking News: Major Tech Company Announces Revolutionary AI Development
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-4">
+                                                        <p className="text-sm text-muted-foreground">TechNews • 2 hours ago</p>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+
+                                            <Card className="group cursor-pointer hover:shadow-lg transition-shadow">
+                                                <CardContent className="p-0">
+                                                    <div className="aspect-[2/1] bg-muted relative overflow-hidden">
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0 z-10" />
+                                                        <Image
+                                                            src="https://picsum.photos/800/400?random=20"
+                                                            alt="Article thumbnail"
+                                                            width={800}
+                                                            height={400}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                        <div className="absolute bottom-4 left-4 right-4 z-20">
+                                                            <p className="text-white font-medium line-clamp-2">
+                                                                Global Climate Summit Reaches Historic Agreement
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-4">
+                                                        <p className="text-sm text-muted-foreground">WorldNews • 5 hours ago</p>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+
+                                            <Card className="group cursor-pointer hover:shadow-lg transition-shadow">
+                                                <CardContent className="p-0">
+                                                    <div className="aspect-[2/1] bg-muted relative overflow-hidden">
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0 z-10" />
+                                                        <Image
+                                                            src="https://picsum.photos/800/400?random=5"
+                                                            alt="Article thumbnail"
+                                                            width={800}
+                                                            height={400}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                        <div className="absolute bottom-4 left-4 right-4 z-20">
+                                                            <p className="text-white font-medium line-clamp-2">
+                                                                New Study Reveals Breakthrough in Medical Research
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-4">
+                                                        <p className="text-sm text-muted-foreground">HealthNews • 8 hours ago</p>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </div>
                                     </div>
                                 </div>
                             ) : (
