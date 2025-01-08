@@ -9,7 +9,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Shield, Download, Menu, Loader2 } from 'lucide-react'
+import { Shield, Download, Menu, Loader2, FileText, Users, NewspaperIcon } from 'lucide-react'
 import { Progress } from "@/components/ui/progress"
 import { UserIcon } from "@/components/layout/UserIcon"
 import { CollapsibleSidebar } from "@/components/layout/CollapsibleSidebar"
@@ -56,6 +56,7 @@ export default function ArticleAnalyzer() {
     const [recommendation, setRecommendation] = useState<string>('');
     const [recommendationScore, setRecommendationScore] = useState<number>(0);
     const [isOpen, setIsOpen] = useState(false)
+    const [articleImageUrl, setArticleImageUrl] = useState<string | null>(null);
 
     enum PDFStatus {
         NOT_STARTED = 'not started',
@@ -101,6 +102,7 @@ export default function ArticleAnalyzer() {
             setError(null);
             setArticleId(null)
             setPdfLoading(PDFStatus.NOT_STARTED)
+            setArticleImageUrl(null)
 
             // Set current analysis
             setCurrentAnalysis({
@@ -137,6 +139,7 @@ export default function ArticleAnalyzer() {
                 setArticleContent(result.article || 'No article content available');
                 setArticleTitle(result.title || 'Article Content');
                 setArticleAuthor(result.author || 'Unknown Author')
+                setArticleImageUrl(result.topImage || null)
 
                 // Update tone and bias from response
                 setTone(result.tone || 'Unknown');
@@ -183,6 +186,7 @@ export default function ArticleAnalyzer() {
         setArticleId(analysisResult.article_id || null)
         setArticleTitle(analysisResult.title || 'Article Content')
         setArticleAuthor(analysisResult.author || 'Unknown Author')
+        setArticleImageUrl(analysisResult.topImage || null)
         setTone(analysisResult.tone || 'Unknown')
         setToneExplanation(analysisResult.tone_explanation || '')
         setBias(analysisResult.bias || 'Unknown')
@@ -648,7 +652,22 @@ export default function ArticleAnalyzer() {
                                         <Card className="col-span-1">
                                             <CardHeader>
                                                 <CardArticleTitle>{articleTitle}</CardArticleTitle>
-                                                <CardSubtitle> Written By: {articleAuthor}</CardSubtitle>
+                                                <CardSubtitle>Written By: {articleAuthor}</CardSubtitle>
+                                                <div className="mt-4 flex justify-center">
+                                                    {articleContent && (
+                                                        <div className="max-w-2xl w-[600px] h-[300px] relative rounded-lg overflow-hidden">
+                                                            <Image
+                                                                src={articleImageUrl || "https://picsum.photos/800/400?random=389"}
+                                                                // src="https://i.cbc.ca/1.2564638.1394235533!/fileImage/httpImage/image.jpg_gen/derivatives/16x9_1180/tea-testing-852-jpg.jpg?im=Resize%3D780"
+                                                                alt="Article featured image"
+                                                                width={600}
+                                                                height={300}
+                                                                className="object-cover"
+                                                                priority
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </CardHeader>
                                             <CardContent className="prose max-w-none dark:prose-invert">
                                                 {error && (
@@ -722,8 +741,9 @@ export default function ArticleAnalyzer() {
                                                         <AccordionItem value="content">
                                                             <AccordionTrigger>
                                                                 <div className="flex items-center gap-2">
+                                                                    <FileText className="h-4 w-4 text-gray-600" />
                                                                     Content Analysis
-                                                                    {articleContent && ( // Only show score if article content exists
+                                                                    {articleContent && (
                                                                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(calculateContentScore())}`}>
                                                                             {calculateContentScore()}%
                                                                         </span>
@@ -767,8 +787,9 @@ export default function ArticleAnalyzer() {
                                                         <AccordionItem value="source">
                                                             <AccordionTrigger>
                                                                 <div className="flex items-center gap-2">
+                                                                    <NewspaperIcon className="h-4 w-4 text-gray-600" />
                                                                     Source Credibility
-                                                                    {articleContent && ( // Only show score if article content exists
+                                                                    {articleContent && (
                                                                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(calculateSourceScore())}`}>
                                                                             {calculateSourceScore()}%
                                                                         </span>
@@ -801,8 +822,9 @@ export default function ArticleAnalyzer() {
                                                         <AccordionItem value="social">
                                                             <AccordionTrigger>
                                                                 <div className="flex items-center gap-2">
+                                                                    <Users className="h-4 w-4 text-gray-600" />
                                                                     Social Analysis
-                                                                    {articleContent && ( // Only show score if article content exists
+                                                                    {articleContent && (
                                                                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getScoreColor(socialScore)}`}>
                                                                             {socialScore}%
                                                                         </span>

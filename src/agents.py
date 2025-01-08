@@ -242,6 +242,7 @@ class AgentState(TypedDict):
     input_article: str
     input_author: str
     input_publisher: str
+    input_topImage: str
     article_summary: str
     facts_dict: dict
     non_facts_dict: dict
@@ -411,7 +412,7 @@ class NewsAnalysisOrchestrator:
     def __init__(self):
         self.workflow = fake_news_analysis_workflow()
 
-    def analyze_article(self, article: str, author: str, publisher: str) -> dict:
+    def analyze_article(self, article: str, author: str, publisher: str, topImage: str) -> dict:
         """Run the complete analysis workflow"""
         try:
             # Initialize state
@@ -419,6 +420,7 @@ class NewsAnalysisOrchestrator:
                 "input_article": article,
                 "input_author": author,
                 "input_publisher": publisher,
+                "input_topImage": topImage,
                 "article_summary": "",
                 "facts_dict": {},
                 "non_facts_dict": {},
