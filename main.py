@@ -39,14 +39,14 @@ def extract_article_info(url: str) -> dict:
         article = Article(url)
         article.download()
         article.parse()
-        
-        # Extract info
+
         return {
             "article": article.text,
             "author": article.authors[0] if article.authors else "Unknown",
             "publisher": urlparse(url).netloc.replace('www.', ''),
             "title": article.title.title(),
-            "publish_date": str(article.publish_date) if article.publish_date else None
+            "publish_date": str(article.publish_date) if article.publish_date else None,
+            "topImage": article.top_image if article.top_image else None
         }
     except Exception as e:
         raise ValueError(f"Failed to extract article info: {str(e)}")
@@ -89,7 +89,8 @@ def analyze_article():
         result = orchestrator.analyze_article(
             article=article_info['article'],
             author=article_info['author'],
-            publisher=article_info['publisher']
+            publisher=article_info['publisher'],
+            topImage= article_info['topImage']
         )
 
         result.update(article_info)
@@ -323,6 +324,9 @@ if __name__ == "__main__":
 
     # args = parser.parse_args()
     # main(args.datadir)
+
+    # result = extract_article_info("https://www.cbc.ca/news/canada/pesticide-traces-in-some-tea-exceed-allowable-limits-1.2564624")
+    # print(result)
 
 
     # Get port from environment variable or use default
