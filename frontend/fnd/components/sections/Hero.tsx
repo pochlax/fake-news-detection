@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight } from 'lucide-react'
+import { GraphBackground } from "@/components/ui/GraphBackground"
 
 interface HeroProps {
     onStartTrial: () => void
@@ -8,9 +9,16 @@ interface HeroProps {
 
 export function Hero({ onStartTrial }: HeroProps) {
     return (
-        <section className="min-h-screen flex items-center justify-center px-4 overflow-hidden">
-            <div className="container mx-auto max-w-4xl">
-                <div className="text-center space-y-8">
+        <section className="min-h-screen flex items-center justify-center px-4 overflow-hidden relative">
+            {/* Gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-white" />
+
+            {/* Animated graph background */}
+            <GraphBackground />
+
+            <div className="container mx-auto max-w-4xl relative">
+                {/* Added white background with blur */}
+                <div className="text-center space-y-8 p-8 rounded-3xl">
                     <Badge variant="outline" className="text-lg border-black/20 shadow-sm">
                         ✨ AI-Powered Fact Checking
                     </Badge>

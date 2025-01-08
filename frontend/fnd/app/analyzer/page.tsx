@@ -567,7 +567,6 @@ export default function ArticleAnalyzer() {
                                     <div className="w-full max-w-5xl mt-16">
                                         <div className="flex items-center justify-between mb-6">
                                             <h2 className="text-xl font-semibold">Trending Articles</h2>
-                                            <Button variant="ghost" size="sm">View all</Button>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                             <Card className="group cursor-pointer hover:shadow-lg transition-shadow">
