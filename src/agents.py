@@ -231,10 +231,6 @@ class SourceAnalysisAgent:
         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
         agent_result = agent_executor.invoke({"author": author, "publisher": publisher})
 
-        # (agent_result)
-        # formatted_json = json.loads(agent_result)
-        # formatted_json = json.dumps(agent_result, indent=2)
-        # print(formatted_json)
         return agent_result
 
 
@@ -346,10 +342,8 @@ def run_social_media_analysis(state: AgentState) -> AgentState:
                 total_sentiment += sentiment['average_score']
                 del post['comments']
 
-            total_sentiment = (total_sentiment + 1) / 2 # This makes sure that the sentiment is between 0 and 2.
-
+            total_sentiment = (total_sentiment + 1) / 2 
             total_sentiment = max(0, min(100, round(total_sentiment * 100)))
-            # total_sentiment = 73                                                        # Hardcoding to 73 for demo, remove later
 
             state['reddit_posts'] = result['posts']
             state['reddit_comments_sentiment'] = categorize_value(total_sentiment)
@@ -470,81 +464,3 @@ class NewsAnalysisOrchestrator:
                 "failed_node": node_name,
                 "status": "failed"
             }
-
-
-
-if __name__ == "__main__":
-    from pathlib import Path
-
-    test_article = """
-    Many Popular Tea Bags Contain Alarming Amounts of Deadly Pesticides (avoid these brands like the plague) Most conventional tea brands such as Lipton, Allegro, Celestial Seasonings, Tazo, Teavana, Bigelow, Republic of Tea, Twinings, Yogi, Tea Forte, Mighty Leaf, Trader Joe’s, Tetley contain really high levels of toxic substances such as fluoride and pesticides. We are not talking about calcium fluoride which is a natural element, but about the synthetic fluoride which is a toxic by product. These levels are dangerously high to the point of being considered unsafe. So drinking cheap tea can be as bad as eating junk food. Cheap Tea Contains Fluoride and Pesticides 
-    Most teas are not washed before being dried, thus non-organic teas contain pesticide residues. Some tea brands ( even those claimed organic or pesticide free! ) have recently been found to contain pesticides that are known carcinogens – in quantities above the US and EU limits! 
-    A new study published in the journal of, Food Research International , found that cheaper blends contain enough fluoride to put people under the risk of many illnesses such as bone tooth, kidney problems and even cancer. 
-    In fact, some brands of cheap tea contain nearly 7 parts per million (ppm) and the allowed level of fluoride is 4 ppm. This is quite scary since fluoride gets into your bones and accumulates in your body. It stays there for years. So how did fluoride get into tea? 
-    The tea plant accumulates fluoride as it grows. This means that old leaves contain the most fluoride. Cheaper quality teas are often made from old leaves that contain more fluoride than young tea leaves (here is an example) . Additionally, these cheaper brands use smaller leaves which contain more fluoride. 
-    And what about decaffeinated tea? 
-    Well, decaffeinated tea showed higher fluoride levels than caffeinated tea. 
-    So what is the solution? Should you stop drinking tea all together? Of course not! First of all, make sure to buy loose leaf tea and brew your tea from scratch. Bagged tea which might seem convenient and ready to go, is often made from low quality leaves which surely contain more fluoride. Stick to white tea (here) . It has the least amount of fluoride. Buy organic tea because the methods for cultivation are more sophisticated and conscious. They might even use purified water for the soil. We’ve just scratched the surface here, please check out Food Babe’s full report for more detailed information and a chart of which teas came out with their reputations intact – and please share with your tea-loving friends!
-    """
-
-    # print(f"PyTorch version: {torch.__version__}")
-
-    # test_file = Path("test_text.txt")
-    # test_file.write_text(test_text)
-
-     ##  ------------------------ SANDBOX TESTING ------------------------
-
-    # Load environment variables from .env
-    load_dotenv()
-
-    # Access environment variables
-    api_key = os.getenv("OPENAI_API_KEY")
-    # os.putenv("TAVILY_API_KEY", "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")
-    tavily_api_key = os.getenv("TAVILY_API_KEY")
-
-    # os.setenv("TAVILY_API_KEY") = "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"
-
-
-     ##  ------------------------ CONTENT ANALYSIS AREA ------------------------
-
-    # if api_key and tavily_api_key:
-    # agent = ContentAnalysisAgent()
-    # result = json.loads(agent.analyze_content(test_article, api_key, tavily_api_key)['output'])
-    # else:
-        # print("Skipping OpenAI test - no API key found in environment variables")
-
-    ##  ------------------------ SOURCE ANALYSIS AREA ------------------------
-
-    # agent = SourceAnalysisAgent() 
-    # result = agent.analyze_source("Jonathan Moylan", "BBC", api_key, tavily_api_key)['output']
-
-     ##  ------------------------ SOSMED ANALYSIS AREA ------------------------
-
-    # Experimenting with Reddit API Tool
-    reddit_api_id = os.getenv("REDDIT_CLIENT_ID")
-    reddit_api_secret = os.getenv("REDDIT_CLIENT_SECRET")
-    reddit_user_agent = os.getenv("REDDIT_USER_AGENT")
-
-    ##  ------------------------ LANGRAPH AREA ------------------------
-    # Create orchestrator
-    orchestrator = NewsAnalysisOrchestrator()
-
-    # Test article
-    test_article = {
-        "text": test_article,
-        "author": "Jonathan Moylan",
-        "publisher": "New York Times"
-    }
-
-    # Run analysis
-    result = orchestrator.analyze_article(
-        test_article["text"],
-        test_article["author"],
-        test_article["publisher"]
-    )
-
-    # Print or save results
-    print(json.dumps(result, indent=2))
-
-    # # Clean up test file
-    # test_file.unlink()

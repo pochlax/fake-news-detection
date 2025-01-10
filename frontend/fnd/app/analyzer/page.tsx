@@ -23,14 +23,6 @@ import Image from "next/image"
 export default function ArticleAnalyzer() {
     const router = useRouter()
 
-    // useEffect(() => {
-    //     // Check if user is authenticated
-    //     const userId = localStorage.getItem('userId')
-    //     if (!userId) {
-    //         router.push('/')
-    //     }
-    // }, [router])
-
     const [articleId, setArticleId] = useState<string | null>(null);
     const [inputUrl, setInputUrl] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -226,11 +218,13 @@ export default function ArticleAnalyzer() {
             'Optimisitic': 'text-purple-600',
             'Critical': 'text-blue-600',
             'Informative': 'text-green-600',
+
             // Bias colors
             'None': 'text-green-600',
             'Minimal': 'text-blue-600',
             'Moderate': 'text-yellow-600',
             'Strong': 'text-red-600',
+
             // Support Claims colors
             'Well-Supported': 'text-green-600',
             'Reasonably-Supported': 'text-blue-600',
@@ -453,17 +447,6 @@ export default function ArticleAnalyzer() {
                 <View style={styles.section}>
                     <Text style={styles.title}>{data.title}</Text>
                     <Text style={styles.subtitle}>Written By: {data.author}</Text>
-                    {/* {data.input_topImage && (
-                        <PDFImage
-                            source={{
-                                uri: data.input_topImage,
-                                method: 'GET',
-                                body: null,
-                                headers: {}
-                            }}
-                            style={styles.articleImage}
-                        />
-                    )} */}
                 </View>
 
                 <View style={styles.section}>
@@ -509,15 +492,15 @@ export default function ArticleAnalyzer() {
 
                 <View style={styles.section}>
                     <Text style={styles.heading}>Appendix - References</Text>
-                    {/* Content Analysis URLs */}
+
                     {data.content_analysis_biblio?.map((link: string, index: number) => (
                         <Text key={`content-${index}`} style={[styles.link, styles.blueText]}>{link}</Text>
                     ))}
-                    {/* Source Analysis URLs */}
+
                     {data.source_analysis_biblio?.map((link: string, index: number) => (
                         <Text key={`source-${index}`} style={[styles.link, styles.greenText]}>{link}</Text>
                     ))}
-                    {/* Reddit URLs */}
+
                     {data.reddit_posts?.map((post: any, index: number) => (
                         <Text key={`reddit-${index}`} style={[styles.link, styles.orangeText]}>{post.url}</Text>
                     ))}
@@ -732,7 +715,6 @@ export default function ArticleAnalyzer() {
                                                         <div className="max-w-2xl w-[600px] h-[300px] relative rounded-lg overflow-hidden">
                                                             <Image
                                                                 src={articleImageUrl || "https://picsum.photos/800/400?random=389"}
-                                                                // src="https://i.cbc.ca/1.2564638.1394235533!/fileImage/httpImage/image.jpg_gen/derivatives/16x9_1180/tea-testing-852-jpg.jpg?im=Resize%3D780"
                                                                 alt="Article featured image"
                                                                 width={600}
                                                                 height={300}
@@ -760,12 +742,6 @@ export default function ArticleAnalyzer() {
                                                 )}
                                             </CardContent>
                                         </Card>
-
-                                        {/* <iframe
-                                        src="http://localhost:5000/proxy"
-                                        style={{ width: '100%', height: '100%', border: 'none' }}
-                                        title="Embedded Website"
-                                    ></iframe> */}
                                     </main>
 
                                     {/* Right Sidebar - Analysis */}
@@ -918,10 +894,6 @@ export default function ArticleAnalyzer() {
                                                                             {socialSentimentExplanation}
                                                                         </div>
                                                                     )}
-                                                                    {/* <div className="flex justify-between">
-                                                                <span>Share Pattern</span>
-                                                                <span className="font-medium text-green-600">Organic</span>
-                                                            </div> */}
                                                                 </div>
                                                             </AccordionContent>
                                                         </AccordionItem>

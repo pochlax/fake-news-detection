@@ -6,12 +6,10 @@ import uuid
 import copy
 import firebase_admin
 import google.cloud
-# import requests
 # import time
 
 from dotenv import load_dotenv
 from src import utils as ut
-# from src import agents
 from pathlib import Path
 from flask import Flask, request, jsonify
 from src.agents import NewsAnalysisOrchestrator
@@ -210,37 +208,6 @@ def fetch_article(article_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# @app.route('/proxy', methods=['GET'])
-# def proxy():
-#     # URL of the target website
-#     target_url = "https://www.cbc.ca/news/canada/pesticide-traces-in-some-tea-exceed-allowable-limits-1.2564624"
-
-#     try:
-#         # Fetch the content from the target website
-#         response = requests.get(target_url, headers={'User-Agent': 'Mozilla/5.0'})
-#         response.raise_for_status()  # Check for HTTP request errors
-#         return response.text  # Return the content of the target website
-#     except requests.exceptions.RequestException as e:
-#         # Handle errors and return a meaningful message
-#         return jsonify({"error": str(e)}), 500
-
-# # def proxy():
-# #     # Build the full URL for the target request
-# #     url = "https://www.cbc.ca/news/canada/pesticide-traces-in-some-tea-exceed-allowable-limits-1.2564624"
-
-# #     # Forward the request to the target website
-# #     try:
-# #         response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, stream=True)
-# #         response.raise_for_status()
-
-# #         # Create a Flask Response with the same content and headers
-# #         excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-# #         headers = {key: value for key, value in response.headers.items() if key.lower() not in excluded_headers}
-
-# #         return Response(response.content, status=response.status_code, headers=headers)
-# #     except requests.exceptions.RequestException as e:
-# #         return Response(f"Error fetching content: {str(e)}", status=500)
-
 # Error handlers
 @app.errorhandler(404)
 def not_found(e):
@@ -256,79 +223,8 @@ def server_error(e):
         "status": "failed"
     }), 500
 
-# def main(datadir):
-#     # # Create output directory if it doesn't exist
-#     # output_dir = Path(output)
-#     # output_dir.mkdir(exist_ok=True)
-
-#     # Load the input and output data
-#     input_file = Path(datadir) / "demo_input.txt"
-
-#     if not input_file.exists():
-#         print(f"Error: Input file {input_file} not found")
-#         return
-#     # Read the article file
-#     with open(input_file, "r", encoding="utf-8") as file:
-#         article_text = file.read()
-
-#     # Load environment variables from .env
-#     load_dotenv()
-
-#     # Access environment variables
-#     api_key = os.getenv("OPENAI_API_KEY")
-#     tavily_api_key = os.getenv("TAVILY_API_KEY")
-
-#     # Load the agent
-#     agent = agents.ContentAnalysisAgent()
-
-#     # Generate Report Analysis of Article 
-#     generated_report = agent.analyze_content(article_text, api_key, tavily_api_key)
-
-#     output_file = Path(datadir) / "demo_output.txt"
-#     with open(output_file, "a", encoding="utf-8") as f:
-#         f.write(generated_report)
-#         f.close()
-
-
-    # Generate quizzes
-    # generated_text = agent.generate_questions(text_path=input_file, num_questions=3)
-
-    # # Save results
-    # results = {
-    #     "rouge_score": float(score),
-    #     "generated_text": generated_text,
-    #     "expected_text": expected_text,
-    # }
-
-    # output_file = output_dir / "pred_1.json"
-    # with open(output_file, "w") as f:
-    #     json.dump(results, f, indent=4)
-
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(description="Fake News Detector")
-    # parser.add_argument(
-    #     "-d",
-    #     "--datadir",
-    #     type=str,
-    #     default="data",
-    #     help="Directory containing input data",
-    # )
-    # # parser.add_argument(
-    # #     "-o",
-    # #     "--output",
-    # #     type=str,
-    # #     default="results",
-    # #     help="Output directory (default: results)",
-    # # )
-
-    # args = parser.parse_args()
-    # main(args.datadir)
-
-    # result = extract_article_info("https://www.cbc.ca/news/canada/pesticide-traces-in-some-tea-exceed-allowable-limits-1.2564624")
-    # print(result)
-
-
     # Get port from environment variable or use default
     port = int(os.getenv('PORT', 5000))
     
