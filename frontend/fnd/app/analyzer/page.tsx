@@ -9,15 +9,15 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Shield, Download, Menu, Loader2, FileText, Users, NewspaperIcon } from 'lucide-react'
+import { Loader2, FileText, Users, NewspaperIcon } from 'lucide-react'
 import { Progress } from "@/components/ui/progress"
-import { UserIcon } from "@/components/layout/UserIcon"
 import { CollapsibleSidebar } from "@/components/layout/CollapsibleSidebar"
 import { useRouter } from 'next/navigation'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { toast } from "@/hooks/use-toast"
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image as PDFImage } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image as PDFImage } from '@react-pdf/renderer';
 import Image from "next/image"
+import { AnalyzerNavbar } from "@/components/layout/AnalyzerNavbar"
 
 
 export default function ArticleAnalyzer() {
@@ -512,7 +512,6 @@ export default function ArticleAnalyzer() {
     // Modify handleDownloadReport to update the state
     const handleDownloadReport = async () => {
         try {
-            console.log("Pressed! ArticleID:", articleId)
             setPdfLoading(PDFStatus.IN_PROGRESS)
             if (!articleId) throw new Error('Article ID is required');
             const articleData = await fetchArticleData(articleId);
@@ -541,53 +540,17 @@ export default function ArticleAnalyzer() {
                     />
 
                     <div className={`flex flex-col flex-grow transition-all duration-300 relative ${isOpen ? 'ml-60' : 'ml-0'}`}>
-                        <header className="border-b bg-white dark:bg-gray-800 px-4 py-3">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    {!isOpen && (
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="hover:bg-accent"
-                                            onClick={() => setIsOpen(!isOpen)}
-                                        >
-                                            <Menu className="h-5 w-5" />
-                                        </Button>
-                                    )}
-                                    <div className="flex items-center gap-2" onClick={handleLandingPage}>
-                                        <Shield className="h-5 w-5" />
-                                        <h1 className="text-lg font-semibold">de(fnd)</h1>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    {pdfLoading != PDFStatus.NOT_STARTED ? (
-                                        <PDFDownloadLink
-                                            document={pdfDocument}
-                                            fileName={`analysis-report-${articleTitle}.pdf`}
-                                        >
-                                            <Button variant="ghost" disabled={pdfLoading == PDFStatus.IN_PROGRESS}>
-                                                <Download className="mr-2 h-4 w-4" />
-                                                {pdfLoading == PDFStatus.IN_PROGRESS ? 'Generating...' : 'Download Report'}
-                                            </Button>
-
-                                        </PDFDownloadLink>
-                                    ) : (
-                                        <Button
-                                            variant="ghost"
-                                            onClick={handleDownloadReport}
-                                            disabled={!articleContent}
-                                        >
-                                            <Download className="mr-2 h-4 w-4" />
-                                            Prepare PDF Report
-                                        </Button>
-                                    )}
-
-
-                                    <Button onClick={resetAnalysis}>Analyze New Article</Button>
-                                    <UserIcon />
-                                </div>
-                            </div>
-                        </header>
+                        <AnalyzerNavbar
+                            isOpen={isOpen}
+                            setIsOpen={setIsOpen}
+                            handleLandingPage={handleLandingPage}
+                            pdfLoading={pdfLoading}
+                            pdfDocument={pdfDocument}
+                            articleTitle={articleTitle}
+                            handleDownloadReport={handleDownloadReport}
+                            articleContent={articleContent}
+                            resetAnalysis={resetAnalysis}
+                        />
 
                         {/* Content area with loading overlay */}
                         <div className="flex-1 relative">
