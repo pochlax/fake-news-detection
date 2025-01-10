@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from src import utils as ut
 from pathlib import Path
 from flask import Flask, request, jsonify
-from src.agents import NewsAnalysisOrchestrator
+from src.orchestrator import NewsAnalysisOrchestrator
 from newspaper import Article
 from urllib.parse import urlparse
 from flask_cors import CORS
@@ -99,6 +99,8 @@ def analyze_article():
 
         # returns JSON object as a dictionary
         # result = json.load(f)
+
+        print(result)
 
         if 'recommendation_score' in result:
             # After analysis is complete and you have the result:
